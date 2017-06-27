@@ -1,0 +1,23 @@
+
+{{ partial "head.html" . }}
+<article style="width: 50%; margin-left:auto; margin-right:auto">
+  
+  {{ partial "nav.html" . }}
+  
+  <header>
+    <h2 style="width: 50%; margin-left:auto; margin-right:auto"><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+
+    {{ partial "post_meta.html" . }}
+
+  </header>
+
+  <p>
+  {{ .Summary }}
+  </p>
+
+  {{ if .Truncated }}
+  <footer>
+    <a href="{{ .RelPermalink }}">Loe edasi<i class="fa fa-angle-double-right fa-fw"></i></a>
+  </footer>
+  {{ end }}
+</article>

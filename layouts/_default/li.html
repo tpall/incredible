@@ -1,0 +1,6 @@
+
+{{ partial "head.html" . }}
+
+<div style="margin-top: 100px">{{ partial "nav.html" . }}</div>
+
+<li><time>{{ with .Site.Params.dateFormat }}{{ $.Date.Format . }}{{ else }}{{ .Date.Format "02 Jan 2006, 15:04" }}{{ end }}</time> - <a href="{{ .Permalink }}">{{ .Title }}</a></li>

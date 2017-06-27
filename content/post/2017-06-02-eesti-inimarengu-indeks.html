@@ -1,0 +1,115 @@
+---
+title: Eesti inimarengu indeks
+author: Taavi Päll
+date: '2017-06-02'
+slug: ''
+categories: [visualiseerimine, graafik, analüüs, R]
+tags: [visualiseerimine, raportid]
+references:
+- id: aruanne2017
+  title: Eesti inimarengu aruanne 2016/2017 'Eesti rändeajastul'
+  author: 
+   - family: Tammaru
+     given: Tiit
+   - family: Kristina
+     given:  Kallas
+   - family: Raul
+     given:  Eamets
+   - family: Liili
+     given:  Abuladze
+   - family: Rein
+     given:  Ahas
+   - family: Aet
+     given:  Annist
+   - family: Eva-Maria
+     given:  Asari
+   - family: Martin
+     given:  Ehala
+   - family: Jelena
+     given:  Helemäe
+   - family: Indrek
+     given:  Ibrus
+   - family: Mari-Liis
+     given:  Jakobson
+   - family: Kaja
+     given:  Kumer-Haukanõmm
+   - family: Rainer
+     given:  Kattel
+  URL: http://inimareng.ee
+  issued:
+    year: 2017
+---
+
+
+
+<p>Esimesel juunil 2017 avaldatud Eesti inimarengu aruandes <a href="http://inimareng.ee/pohisonumid-eesti-randeajastul/">Eesti rändeajastul</a> tuuakse välja, et Eesti inimarengu indeks on aastatel 1990–2015 teinud läbi märkimisväärse tõusu. Uutest Euroopa Liiduga (EU) liitujatest on Eesti oma indeksi kasvuga saavutanud auväärse kolmanda koha Sloveenias ja Tšehhi Vabariigi järel.</p>
+<p>Kahjuks on selle väite toetuseks toodud andmed esitatud ainult tabeli kujul. Eesti edu visuaalseks toetuseks oleks pidanud esitama võrreldavate riikide inimarengu indeksi kasvukõverad. Puhtalt tabelit vaadates ei ole võimalik seda väidet lihtsal viisil kontrollida. Põhimõtteliselt on võimalik võrrelda riikide numberid aastate kaupa tulbas, kuid kasvu võrdlemine nõuab juba arvutamist. Kasvukõvera tõusu oleks aga ilma arvutamata võimalik hinnata visuaalselt. Proovime siis luua selle puuduva visuaali.</p>
+<div class="figure" style="text-align: left"><span id="fig:unnamed-chunk-1"></span>
+<img src="/post/2017-06-02-eesti-inimarengu-indeks_files/figure-html/unnamed-chunk-1-1.png" alt="Inimarengu indeksi 1990-2015 tabeli pea. @aruanne2017" width="672" />
+<p class="caption">
+Figure 1: Inimarengu indeksi 1990-2015 tabeli pea. <span class="citation">Tammaru et al. (2017)</span>
+</p>
+</div>
+<p>Kõigepealt laeme raporti koduleheküljelt alla jutuks oleva tabeli andmetega. Paradoksaalsel kombel on nende andmete esitamine tabeli kujul hea just kättesaadavuse seisukohalt. Andmete kaevamiseks kasutame <code>R</code> programmi paketi <code>rvest</code> funktsioone</p>
+<pre class="r"><code>library(tidyverse)
+library(rvest)
+
+url &lt;- &quot;http://inimareng.ee/pohisonumid-eesti-randeajastul/&quot; # link raportile
+page &lt;- read_html(url) # laadime alla põhisõnumite artikli
+inimareng &lt;- html_table(page, dec = &quot;,&quot;)[[1]] # tabel alla laaditud lehelt
+colnames(inimareng)[1] &lt;- &quot;Riik&quot; # esimesel tulbal puududb pealkiri
+inimareng &lt;- gather(inimareng, Aasta, indeks, -Riik) # viime andmed pikka formaati
+head(inimareng) # tabeli pea</code></pre>
+<pre><code>##              Riik Aasta indeks
+## 1           Taani  1990  0.799
+## 2         Holland  1990  0.829
+## 3        Saksamaa  1990  0.801
+## 4         Iirimaa  1990  0.770
+## 5          Rootsi  1990  0.815
+## 6 Ühendkuningriik  1990  0.773</code></pre>
+<p>Esimene versioon inimarengu indeksi kasvukõveratest ongi valmis. Riigid on järjestatud tähestikulises järjekorras. Kas Eesti kasv torkab silma?</p>
+<pre class="r"><code>ggplot(inimareng, aes(Aasta, indeks, group=1)) +
+  geom_line() +
+  facet_wrap(~Riik, ncol = 7) +
+  theme(axis.text.x = element_text(angle=45, hjust = 1)) +
+  ylab(&quot;Inimarengu indeks&quot;)</code></pre>
+<p><img src="/post/2017-06-02-eesti-inimarengu-indeks_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Arvutame siis kasvu ja järjestame riigid selle põhjal. Kuna puuduvad paralleeluniversumid, siis on igal riigil on iga ajaperioodi kohta ainult üks väärtus ja kasvu iseloomustamiseks piisaks lihtsalt ainult esimese ja viimase ajaperioodi vahe arvutamiseks. Meie aga arvutame lieaarse mudeli tõusu, kuigi need kõverad on kohati ilmselgelt mittelineaarsed. Me teeme muutuja <code>Aasta</code> numbriliseks <code>mutate_at(&quot;Aasta&quot;, as.numeric)</code>, muidu saaksimegi ainult vahe aastaga 1990 võrreldes. Kui me võtame aastad numbrilise muutujana, siis ei oma lõikepunkt tähendust ja me vaatame ainult mudeli tõusu. <code>broom::tidy</code> funktsioon konverteerib <code>lm</code> funktsiooni väljundi mugavalt käitletavaks andmeraamiks.</p>
+<pre class="r"><code>library(broom) # tidy funktsioon
+kasv &lt;- inimareng %&gt;% 
+  mutate_at(&quot;Aasta&quot;, as.numeric) %&gt;% 
+  split(.$Riik) %&gt;% 
+  map_df(~tidy(lm(indeks~Aasta, .x)), .id=&quot;Riik&quot;) %&gt;% 
+  filter(term==&quot;Aasta&quot;) %&gt;% # vaatame ainult tõusu
+  arrange(estimate)
+head(kasv)</code></pre>
+<pre><code>##        Riik  term    estimate    std.error statistic     p.value
+## 1    Belgia Aasta 0.003176271 0.0010274486  3.091416 0.090636205
+## 2    Rootsi Aasta 0.003430508 0.0013501572  2.540822 0.126229302
+## 3   Holland Aasta 0.003705085 0.0003307474 11.202158 0.007874861
+## 4   Austria Aasta 0.003789831 0.0003545575 10.688903 0.008639273
+## 5 Bulgaaria Aasta 0.003793220 0.0006367109  5.957524 0.027037813
+## 6     Soome Aasta 0.003908475 0.0010268669  3.806213 0.062613088</code></pre>
+<p>Järjestame riigid mudeli tõusu järgi.</p>
+<pre class="r"><code>ia_kasv &lt;- left_join(inimareng, kasv, &quot;Riik&quot;)
+riik_jrk &lt;- select(ia_kasv, Riik, estimate) %&gt;% 
+  distinct() %&gt;% 
+  arrange(desc(estimate))
+ia_kasv$Riik_kasv &lt;- factor(ia_kasv$Riik, levels = riik_jrk$Riik)</code></pre>
+<p>Siin ongi EU riigid järjestatuna inimarengu indeksi kasvu järgi. Eesti on Läti järel neljandal kohal. Läti on teinud tubli kasvu, Eesti asub indeksis 2015 seisuga siiski kõrgemal. Võrreldes naabrite, Läti ja Leeduga, on Eesti kasv olnud ühtlasem ja ei ole viimase viie aasta jooksul nii palju takerdunud.</p>
+<pre class="r"><code>ggplot(ia_kasv, aes(Aasta, indeks, group=1)) +
+  geom_line() +
+  facet_wrap(~Riik_kasv, ncol = 7) +
+  theme(axis.text.x = element_text(angle=45, hjust = 1)) +
+  ylab(&quot;Inimarengu indeks&quot;)</code></pre>
+<p><img src="/post/2017-06-02-eesti-inimarengu-indeks_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Tegelikult annaks veel nokitseda, kuid kokkuvõtvalt oleks inimarengu indeksi visuaalne representatsioon aidanud kaasa Eesti võrdlusele teiste EU riikidega. Sõltumata riikide järjestamise põhimõttest.</p>
+<p>Selgelt on riike, mis on alustanud meie ja meie lähinaabritega samalt tasemelt, kus inimarengu indeks on teinud küll nõksu ülespoole, kuid viimasel perioodil on toimunud arengu pidurdumine, näiteks nagu Rumeenia ja Bulgaaria. Loomulikult on areng väiksem riikides, mis olid juba kõrge arengutasemega perioodi alguses, Nõukogude Liidu lagunemise ajal.</p>
+<div id="viited" class="section level1 unnumbered">
+<h1>Viited</h1>
+<div id="refs" class="references">
+<div id="ref-aruanne2017">
+<p>Tammaru, Tiit, Kallas Kristina, Eamets Raul, Abuladze Liili, Ahas Rein, Annist Aet, Asari Eva-Maria, et al. 2017. “Eesti Inimarengu Aruanne 2016/2017 ‘Eesti Rändeajastul’.” <a href="http://inimareng.ee" class="uri">http://inimareng.ee</a>.</p>
+</div>
+</div>
+</div>

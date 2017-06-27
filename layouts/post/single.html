@@ -1,0 +1,25 @@
+{{ partial "head.html" . }}
+
+{{ partial "nav.html" . }}
+
+<div style="width: 50%; text-align: center; margin-top: 100px; margin-left:auto; margin-right:auto; margin-top:100px" class="header">
+  <h1>{{ .Title }}</h1>
+  <h2>{{ .Description }}</h2>
+</div>
+<div style="width: 50%; text-align: left; margin-left:auto; margin-right:auto" class="content">
+
+  {{ partial "post_meta.html" . }}
+  
+  {{ .FuzzyWordCount }} sõna
+  
+  <p></p>
+
+  {{ .Content }}
+
+  {{ partial "prev_next_post.html" . }}
+
+  <div style="margin-top:50px">{{ partial "disqus.html" . }}</div>
+
+</div>
+
+<!--{{ partial "footer.html" . }}-->
