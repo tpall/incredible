@@ -1,0 +1,435 @@
+---
+title: GPS andmed kaartile, matka blogi
+author: Taavi Päll
+date: '2017-08-11'
+slug: gps-andmed-kaartile
+categories:
+  - R
+  - visualiseerimine
+tags:
+  - leaflet
+  - leaflet.elevation
+---
+
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+![Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva üle Håra lähedal laagris. Selja taga on kõigest natuke üle 60 km, aga 1260 tõusumeetrit. 17. juuli 2017.](/photos/2017-08-11/20170717_222506-small.jpg)
+
+## Marsruut
+Norra rattamatk alguse ja lõpuga Tallinnast, 2017-07-10 kuni 2017-07-21.
+Auto ja laevaga Tallinn--Stockholm--Geilo ja tagasi 10-11. ja 20-21. juuli. 
+Ratastega Geilo--Voss ring 12-19. juuli.
+Rongiga Voss--Geilo.    
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+library(dplyr)
+library(purrr)
+library(stringr)
+library(readr)
+library(tidyr)
+library(ggplot2)
+library(viridis)
+library(stringr)
+library(leaflet)
+library(leaflet.extras) # fullscreen control button
+library(htmltools)
+library(htmlwidgets)
+library(jsonlite)
+```
+
+## Träkkimine
+Jalgrattamarsruuti träkkisin Suunto Ambit 2 kellaga. 
+Aku tööaja pikendamiseks kasutasin 10 s salvestusintervalle ja 'OK' GPS täpsussetingut, mis peaks tagama ~50 tunnise patarei kasutusaja.
+Pika salvestusintervalli tõttu ei jookse GPS rada kaartile panduna alati täpselt mööda teid, vaid kipub kurve sirgeks lõikama, mis on muidugi minoorne puudus.    
+
+Proovime selle marsruudi päevade kaupa kokku panna ja kaartile joonistada koos kõrgusprofiiliga.
+
+## GPS rada kaartile
+Tegelikult piisab selleks mõnest koodireast, kui kasutada R pakette `leaflet` ja `leaflet.extras`.
+Kõige pealt laadin Suunto Movescount võrgulehelt alla .gpx _track_ failid ja salvestan nad oma arvutisse kataloogi nimega `data/`.   
+
+_GPX failidest saab importida R-i GPS andmed GIS formaati näiteks kasutades `readOGR` funktsiooni paketist `rgdal`._
+_Imporditud rajajooned/rajapunktid on `Spatial` klassi objektid, mida saab siis R-is edasi töödelda ja analüüsida kasutades näiteks `sp` või `rgdal` paketi tööriistu._   
+
+Mina kavatsen aga kasutada otse GPX andmete lisamiseks `leaflet` kaartile `leaflet.extras` paketi funktsiooni `addGPX`, mis võtab andmed kas __a)__ gpx failist või __b)__ gpx xml stringist (pikk xml formaadis lause).
+Niimoodi saan ma kasutada algseid andmeid ja jääb ära andmete vahepealne konverteerimine `SpatialLines`, `SpatialPointsDataFrame` või muusse sellisesse objekti.  
+
+### Kui on soov eri failides olevaid radasid ühendada
+Mõnel päeval salvestasin ma mitu träkki: näiteks enne lõunapausi ja peale lõunapausi.
+Liidan need träkid päevakaupa kokku.
+Selleks kasutan käsurea programmi `gpsbabel`, mille käivitamise ma pakendan R-i funktsiooni `merge_gpx`.
+
+```{r utilityfuns}
+# Extract date from file name
+extract_date <- function(gpxfile){
+  # Remove letters and punctuation from file name
+  datetime <- gsub("[a-zA-Z[:punct:]]", "", gpxfile)
+  # Parse datetime
+  datetime <- lubridate::ymd_hms(datetime)
+  # Extract date
+  date <- lubridate::date(datetime)
+  as.character(date)
+}
+
+# Tidy gpx
+tidy_gpx <- function(gpxstring) {
+  
+  # Strip namespace
+  xml <- xml2::as_xml_document(gpxstring)
+  xml <- xml2::xml_ns_strip(xml)
+  trk <- xml2::xml_find_all(xml, "trk")
+  trk <- xml2::xml_child(trk, "trkseg")
+  trk <- xml2::xml_children(trk)
+  
+  # Latitude and longitude
+  trkpt <- xml2::xml_attrs(trk)
+  trkpt <- do.call(rbind, trkpt)
+  trkpt <- tibble::as_tibble(trkpt)
+  trkpt <- dplyr::mutate_all(trkpt, as.numeric)
+  
+  # Elevation
+  ele <- xml2::xml_find_all(trk, "ele")
+  ele <- xml2::xml_double(ele)
+  
+  # Time
+  time <- xml2::xml_find_all(trk, "time")
+  time <- xml2::xml_text(time)
+  time <- readr::parse_datetime(time)
+  
+  # Create data_frame
+  dplyr::bind_cols(trkpt, tibble::tibble(ele, time))
+}
+
+```
+
+Alustuseks moodustan gpx faili nimedest ja nende nimes olevatest kuupäevadest `data_frame`-i.
+Seejärel grupeerin failinimed kuupäevade järgi listidesse ja ühendan omavahel otsapidi iga kuupäeva päevateekonnad kasutades `gpsbabel` programmi.
+Viimaks lisan legendi jaoks tabelisse ka 'käsitsi' kokku pandud päevateekondade algus- ja lõpppunktid.
+
+```{r import-gpx-tracks}
+# List gpx files in data folder
+tracks <- data_frame(gpx_files = list.files("data/", full.names = T))
+
+# Extract date from gpx file name, import and tidy gpx
+tracks <- mutate(tracks, date = extract_date(gpx_files),
+                 gpx_strings = map(gpx_files, readr::read_file),
+                 gpx_df = map(gpx_strings, tidy_gpx))
+
+tracks <- mutate(tracks, gpx_df = map(gpx_df, ~select(.x, lon, lat, ele)))
+
+# Function to merge day trips and generate MultiLineString geojson objects
+dfs_MLS_gjs <- function(gpx_df_list) {
+  jsonlite::toJSON(list(type = "Feature", 
+                        geometry = list(type = "MultiLineString", 
+                                        coordinates = gpx_df_list),
+                        properties = NULL), 
+                   auto_unbox = TRUE, 
+                   dataframe = "values") %>% 
+    jsonlite::fromJSON() %>% 
+    jsonlite::toJSON(auto_unbox = TRUE)
+}
+
+# Get bounding box data and generate geojson ----------------------------------------
+tracks <- tracks %>%
+  group_by(date) %>%
+  do(geojson = dfs_MLS_gjs(.$gpx_df), 
+     gpx_df = bind_rows(.$gpx_df)) %>%
+  ungroup()
+
+# Calculate bounding box data from merged dataframe
+tracks <- mutate(tracks, bb = map(gpx_df, ~summarise_at(.x, c("lon", "lat"), c("min", "max"))))
+
+# Start and end points for day trips to be used in legend
+tracks$trip  <- c("Geilo-Nedra Grøndalsvatne (Rallarvegen)",
+                  "Nedra Grøndalsvatne-Voss-Dalavegen",
+                  "Dalavegen-Stanghelle-Bergen (train)-Lyseklostervegen",
+                  "Lyseklostervegen-Buavågen",
+                  "Buavågen-Saudavegen",
+                  "Saudavegen-Sauda-Håra",
+                  "Håra-Odda-Utne",
+                  "Kvanndal-Voss")
+```
+
+
+### Arvutame summaarse tõusu ja laskumise iga päeva kohta
+
+Kasutades gpx kõrgusandmeid (`ele`) arvutame kui palju sai iga päev mäest ülesse ronitud ja kui palju alla lastud.
+```{r ele, fig.cap="Summaarne päeva tõus ja laskumine."}
+# Function to calculate ascent and descent
+get_ascent_descent <- function(d){
+  ele_diffs <- diff(d$ele)
+  ascent <- ele_diffs[ele_diffs > 0] %>% sum()
+  descent <- ele_diffs[ele_diffs < 0] %>% sum() %>% abs
+  return(data_frame(ascent = ascent, descent = descent))
+}
+# Calculate ascent and descent and round values to integers
+tracks <- mutate(tracks, climbs = map(gpx_df, ~ get_ascent_descent(.x) %>% mutate_all(round))) %>% unnest(climbs)
+
+# Gather data into long format for plotting
+tracks_gat <- select(tracks, date, trip, ascent, descent) %>% 
+  gather(key, value, ascent, descent)
+
+# Plot ascent and descent for each day
+ggplot(tracks_gat, aes(paste(date, trip, sep = ", "), value, fill = key)) + 
+  geom_bar(stat = 'identity', position = 'dodge') +
+  coord_flip() + 
+  ylab("Summed value, meters") +
+  scale_fill_viridis(discrete = TRUE) +
+  theme(axis.title.y = element_blank(),
+        legend.title = element_blank(),
+        legend.position = c(0.85, 0.94),
+        legend.background = element_blank())
+```
+
+
+### Lisame kaartile fotod
+Lisan tabelisse ka matka jooksul paar telefoniga tehtud tehtud fotot, millel on positsiooni info olemas.
+Positsiooneerimisinfo võtan fotode infost välja kasutades käsureaprogrammi `exiftool`, mille olen jälle pakendanud R-i funktsioonina: `exif_location`.
+Alternatiivselt võib ligikaudse positsioneerimise tuletada foto tegemise kellaajast.
+Fotod saab lisada `leaflet`-is markerite popup-idesse, milleks tuleb fotode pathid pakendada HTML-ina, minimaalselt näiteks `<img src="path-to-photo/" />` ja anda funktsioonile pildi koordinaadid.
+
+```{r photos, warning=FALSE}
+# Get list of photos
+static_path <- "~/Dropbox/blog/static/"
+photos_dir <- "/photos/2017-08-11/"
+photos <- list.files(file.path(static_path, photos_dir))
+photos <- data_frame(static_path, photos_dir, photos)
+
+# Function to extract location info from exif data
+exif_location <- function(path) {
+  # Read GPS locaton using exiftool
+  exif_cmd <- paste("exiftool -c '%.6f'", path, "| grep 'GPS Position'")  
+  location <- system(exif_cmd, intern = TRUE, ignore.stderr = TRUE) # execute exiftool-command
+  location <- stringr::str_extract_all(location, "[0-9]+\\.[0-9]+") %>%
+    unlist %>% 
+    vapply(as.numeric, FUN.VALUE =  double(1), USE.NAMES = FALSE) 
+  
+  if(length(location)!=2){
+    warning("Location data not found!")
+    location <- c(NA, NA)
+  }
+  
+  names(location) <- c("lat", "lon")
+  location <- dplyr::data_frame(lon = location[[2]], lat = location[[1]])
+  return(location)
+}
+
+# Extract gps data from exif
+photos <- mutate(photos, path = pmap_chr(list(static_path, photos_dir, photos), file.path))
+photos <- mutate(photos, photos_location = map(path, exif_location)) %>% 
+  unnest(photos_location) %>% 
+  filter(complete.cases(.))
+
+# Create popup
+photos <- mutate(photos, 
+                 date = extract_date(photos),
+                 path = file.path(photos_dir, photos),
+                 popup = sprintf("<img src='%s' style='height:252px;width:448px;' />
+                                          <p>Foto: Taavi Päll</p>", path)) %>% 
+  select(date, lon, lat, popup)
+
+# Nest data necessary to display photo on map into data_frame
+photos <- nest(photos, lon, lat, popup, .key = "popupdata")
+
+# Join photos data to tracks
+tracks <- left_join(tracks, photos)
+```
+
+## Päevateekonnad
+Plotime oma ettevalmistatud andmed kasutades paketti `leaflet`. 
+<!-- Funktsioon on adapteeritud: http://mhermans.net/hiking-gpx-r-leaflet.html. -->
+Kaartikihte saab lisada funktsiooniga `addTiles` või `addProviderTiles`.
+Saadaolevaid kaarte näitavad käsud `providers` ja `providers.details`.
+
+```{r providers}
+# Let's have a look at some map providers
+sample(providers, 6)
+```
+
+`leaflet`-i kaart koostatakse kiht-kihilt. 
+Iga päeva distantsi kanname eraldi kaartile, lisame _kõrgusprofiili_, legendi ja fotod, kui need on olemas.   
+
+Kõrgusprofiili lisamiseks on `leaflet` __javascript__ programmile olemas [plugin](https://github.com/MrMufflon/Leaflet.Elevation) `L.control.elevation`, mis pole aga R-i jaoks implementeeritud.
+Lisaks vajab see plugin (*loomulikult!*) kõrgusinfot, mis paistab minevat kaduma, kui kasutada `leaflet.extras` paketi funktsiooni `addGPX` (viimane kasutab leafleti `omnivore` pluginat, mis GPX andmete puhul kõrgusinfot ei impordi).
+See tähendab, et tuleb kasutada üht teist [leaflet GPX pluginat](https://github.com/mpetazzoni/leaflet-gpx), mis impordib ka _altituudi_: `leaflet-gpx`.
+Aga ka see plugin pole R-i jaoks implementeeritud.
+Lahenduseks on need pluginad javascripti kujul leafleti R funktsiooni lisada, nagu on näidatud siin: https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92, kasutades `htmlwidgets::onRender` funktsiooni. 
+Soovitav on enne kontrollida veebibrauseris kas lisatav JS ka muidu töötab.
+
+#### API keys
+Mitmed kaartikihtide pakkujad nt. [thunderforest](https://www.thunderforest.com) tahavad registreerimist. 
+Ilma registreerimiseta näidatakse kaartil tüütut vesimärki.
+Thunderforestil on väikeses mahus kasutamine tasuta ja registreerimisel antakse unikaalne API key, mis tuleb kaarti URL-i lõppu lisada kujul `?apikey=your-unique-apikey` (vt. ka allpool olevat koodi).
+Et mitte oma isiklikku apikey-d tervele internetile avalikuks teha, tuleks see lisada R-i _environment variable-ks_, kust selle saab kätte kasutades käsku `Sys.getenv()`.
+Käimasolevasse R-i sessiooni _environmenti_ saab apikey lisada kasutades `Sys.setenv(THUNDERF_APIKEY = "your-unique-apikey")` käsku (thunderforest-i näitel).
+Sellisel juhul läheb see R-ist väljumisel muidugi kaotsi ja tuleb taaskäivitamisel uuesti lisada.
+Permanentselt saab sellise apikey lisada oma R-i environmenti kirjutades selle rea (THUNDERF_APIKEY = "your-unique-apikey") .Renviron faili.
+
+```{r plot-trip-fun}
+# Use fa icon
+icon_fa_camera <- makeAwesomeIcon(icon = 'camera', 
+                           markerColor = 'red',
+                           library = 'fa',
+                           iconColor = 'black')
+# Plotting function
+#' @param data geojson object.
+#' @param bb numeric vector, bounding box.
+#' @param trip character string.
+#' @param popupdata popups marker data.
+plot_trip <- function(data, bb, trip = NULL, popupdata = NULL){
+  
+  # Thunderforest base url
+  thunderforest_link_template <- "https://{s}.tile.thunderforest.com/%s/{z}/{x}/{y}.png?apikey=%s"
+  
+  # Compose map
+  m <- leaflet() %>%
+    
+    # Zoom map to your data
+    fitBounds(lng1 = bb[[1]], lat1 = bb[[2]], lng2 = bb[[3]], lat2 = bb[[4]]) %>%
+    
+    # Add tiles
+    addTiles(sprintf(thunderforest_link_template, "landscape", Sys.getenv("THUNDERF_APIKEY")), group = "Topograafiline") %>%
+    addTiles(sprintf(thunderforest_link_template, "cycle", Sys.getenv("THUNDERF_APIKEY")), group = "Rattateed") %>%
+    addTiles(sprintf(thunderforest_link_template, "outdoors", Sys.getenv("THUNDERF_APIKEY")), group = "Matka- ja terviserajad") %>%
+    addProviderTiles("Stamen.Terrain", group = "Pinnavormid", options = providerTileOptions(detectRetina = T)) %>%
+    addProviderTiles("OpenStreetMap.Mapnik", group = "Sõiduteed", options = providerTileOptions(detectRetina = T)) %>%
+    addProviderTiles("Esri.WorldImagery", group = "Satelliit", options = providerTileOptions(detectRetina = T))
+  
+  # Add data via JS to R leaflet as described in:
+  # https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92
+  # local leaflet.elevation-0.0.4.src.js was updated based on this pull request:
+  # Draw height indicator for each map separately #49
+  # https://github.com/MrMufflon/Leaflet.Elevation/pull/49/files
+  elevationPlugin <- htmlDependency("Leaflet.elevation", "0.0.4",
+                                    src = normalizePath("lib/elevation/"),
+                                    script = "leaflet.elevation-0.0.4.src.js",
+                                    stylesheet = "leaflet.elevation-0.0.4.css")
+  
+  # A function that takes a plugin htmlDependency object and adds
+  # it to the map. This ensures that however or whenever the map
+  # gets rendered, the plugin will be loaded into the browser.
+  registerPlugin <- function(map, plugin) {
+    map$dependencies <- c(map$dependencies, list(plugin))
+    map
+  }
+  
+  m <- m %>%
+    # Register plugins on this map instance
+    registerPlugin(elevationPlugin) %>%
+    # Add your custom JS logic here. The `this` keyword
+    # refers to the Leaflet (JS) map object.
+    onRender('function(el, x, data) {
+
+          var elev = L.control.elevation({
+              theme: "lime-theme",
+              width: 300
+          });
+              elev.addTo(this);
+          
+          L.geoJson(data, {
+		      onEachFeature: elev.addData.bind(elev)
+		      }).addTo(this);
+
+}', data = data)
+  
+  # Add legend
+  if(!is.null(trip)){
+    m <- m %>% addLegend(position = 'bottomright', 
+                         opacity = 0.4, 
+                         colors = 'blue', 
+                         labels = trip,
+                         title = 'Norra 2017')}
+  
+  # Add photo markers
+  if(!is.null(popupdata)){
+    m <- m %>% addAwesomeMarkers(lng = popupdata$lon,
+                                 lat = popupdata$lat,
+                                 popup = popupdata$popup,
+                                 popupOptions = popupOptions(closeButton = TRUE, 
+                                                             maxWidth = 500,
+                                                             closeOnClick = TRUE),
+                                 icon = icon_fa_camera,
+                                 group = 'Fotod')
+  }
+  
+  # Layers control
+  m %>% addLayersControl(position = 'bottomright',
+                         baseGroups = c("Topograafiline", 
+                                        "Sõiduteed", 
+                                        "Rattateed", 
+                                        "Matka- ja terviserajad",  
+                                        "Satelliit", 
+                                        "Pinnavormid"),
+                         # overlayGroups = c("Rattamarsruut", "Fotod"),
+                         options = layersControlOptions(collapsed = TRUE)) %>%
+    
+    # Add a fullscreen control button
+    addFullscreenControl()
+}
+```
+
+> Iga päeva distantsi kanname eraldi kaartile, lisame legendi ja fotod, kui need on olemas.
+
+Teeme iga päeva kohta kaarti kasutades eelpool kokku pandud `plot_trip` funktsiooni.
+`purrr` paketi funktsioon `pmap` võimaldab argumendina kasutada listi, millesse saab lisada vastavalt vajadusele N+1 objekti. 
+'purrr::map' ja 'purrr::map2' töötavad vastavalt ühe või kahe argumendiga.
+```{r plot-trips}
+tracks <- mutate(tracks, trip_leaf = pmap(list(geojson, bb, trip, popupdata), plot_trip))
+```
+
+Üksikuid kaarte näeb tracks data_frame-st niimoodi, tuleb valida trip_leaf list/tulp ja sealt subsettida:
+```{r day1, fig.cap="Esimene päev.", eval=FALSE}
+tracks$trip_leaf[[1]]
+```
+
+Erinevaid aluskaarte saab valida alt paremast nurgast (legendi kohal), kursoriga aktiveeritavast menüüst. 
+
+### K, 12. juuli
+
+```{r day-1, echo=FALSE, fig.cap="Esimesel päeval sai kogemata hullu pandud ja kogu Rallarvägen ühe raksuga läbi sõidetud. Alguses sai suvise aasa servas õlut juua, hiljem tuli ratast läbi lume tassida."}
+tracks$trip_leaf[[1]]
+```
+
+### N, 13. juuli
+
+```{r day-2, echo=FALSE, fig.cap="Myrdali ja Utne vahel tuli sõita üks peatus rongiga, läbi tunneli. Rongis on tunnelis sõites pileti ostmine problemaatiline, mistõttu saime lausa tasuta."}
+tracks$trip_leaf[[2]]
+```
+
+### R, 14. juuli
+
+```{r day-3, echo=FALSE, fig.cap="Stanghelles oli plaan praamiga teisele kaldale sõita ja rattaga Bergenisse vändata, kuid selle ülesõidu oleks pidanud juba varem kokku leppima/tellima. Seega sõitsime rongiga otse Bergenisse. Ööbisime kloostri taga metsas, suht literaalselt."}
+tracks$trip_leaf[[3]]
+```
+
+### L, 15. juuli
+
+```{r day-4, echo=FALSE, fig.cap="Päev algas ekslemise ja sadama otsimisega. Ööbima jäime vihma tõttu ühte pisikesse sadamasse, kõigi mugavustega sadamamajakesse."}
+tracks$trip_leaf[[4]]
+```
+
+### P, 16. juuli
+
+```{r day-5, echo=FALSE, fig.cap="Hoogtöö päev. Sai sõidetud 100 km ja üle 1000 m ronitud. Unistasime õllest."}
+tracks$trip_leaf[[5]]
+```
+
+### E, 17. juuli
+
+```{r day-6, echo=FALSE, fig.cap="Kõrgel on ilus - ronimise päev. Sai sõidetud pea poole vähem kui eelmisel päeval, kuid see eest rohkem ronida. Trackis on vahepeal katkestus, sest unustasin kella sisse lülitada, olid kõige magusamad ronimispalad."}
+tracks$trip_leaf[[6]]
+```
+
+### T, 18. juuli
+
+```{r day-7, echo=FALSE, fig.cap="Allamäge. Päev algas küll korraliku ronimise ja 4+km pikkuse tunneliga, kuid hiljem oli ainult allamäge veeremine. Tundus, et läbisime Norra puuviljakasvatuspiirkonda - kõikjal olid mureli- ja pirniaiad."}
+tracks$trip_leaf[[7]]
+```
+
+### K, 19. juuli
+
+```{r day-8, echo=FALSE, fig.cap="Tagasi Vossi rongi peale. Teepeal nägime paari turistilõksu ja peldikut, mis mõjus nagu pühamu."}
+tracks$trip_leaf[[8]]
+```
+

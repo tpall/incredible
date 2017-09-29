@@ -60,27 +60,16 @@ pk10 &lt;- json_to_df(path_to_PK10.json)
 
 # Vaatame imporditud andmeid
 head(pk10)</code></pre>
-<pre><code>##   Aasta                             Paige          Sugu     Vanuserühm
-## 1  2000 All malignant neoplasms (C00-C97) Men and women All age groups
-## 2  2001 All malignant neoplasms (C00-C97) Men and women All age groups
-## 3  2002 All malignant neoplasms (C00-C97) Men and women All age groups
-## 4  2003 All malignant neoplasms (C00-C97) Men and women All age groups
-## 5  2004 All malignant neoplasms (C00-C97) Men and women All age groups
-## 6  2005 All malignant neoplasms (C00-C97) Men and women All age groups
-##                                                                         label
-## 1 New cases of malignant neoplasms by Year, Specified site, Sex and Age Group
-## 2 New cases of malignant neoplasms by Year, Specified site, Sex and Age Group
-## 3 New cases of malignant neoplasms by Year, Specified site, Sex and Age Group
-## 4 New cases of malignant neoplasms by Year, Specified site, Sex and Age Group
-## 5 New cases of malignant neoplasms by Year, Specified site, Sex and Age Group
-## 6 New cases of malignant neoplasms by Year, Specified site, Sex and Age Group
-##                     source              updated value
-## 1 Estonian Cancer Registry 2015-06-18T08:31:00Z  6032
-## 2 Estonian Cancer Registry 2015-06-18T08:31:00Z  6237
-## 3 Estonian Cancer Registry 2015-06-18T08:31:00Z  6119
-## 4 Estonian Cancer Registry 2015-06-18T08:31:00Z  6378
-## 5 Estonian Cancer Registry 2015-06-18T08:31:00Z  6813
-## 6 Estonian Cancer Registry 2015-06-18T08:31:00Z  6525</code></pre>
+<pre><code>## # A tibble: 6 x 7
+##     Year                  `Specified site`           Sex `All age groups`
+##   &lt;fctr&gt;                            &lt;fctr&gt;        &lt;fctr&gt;            &lt;int&gt;
+## 1   2000 All malignant neoplasms (C00-C97) Men and women             6032
+## 2   2001 All malignant neoplasms (C00-C97) Men and women             6237
+## 3   2002 All malignant neoplasms (C00-C97) Men and women             6119
+## 4   2003 All malignant neoplasms (C00-C97) Men and women             6378
+## 5   2004 All malignant neoplasms (C00-C97) Men and women             6813
+## 6   2005 All malignant neoplasms (C00-C97) Men and women             6525
+## # ... with 3 more variables: label &lt;chr&gt;, source &lt;chr&gt;, updated &lt;chr&gt;</code></pre>
 <p><br/></p>
 <p>Eks näe, kui pikk eluiga sellel funktsioonil on ja muidugi Statistikaameti andmebaas… Seniks, ilusat avastamist!</p>
 <p><br/><br/></p>
