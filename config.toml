@@ -1,9 +1,8 @@
 # Site settings
-baseurl = "https://credibleinterval.ee/"
+baseurl = "/"
 languageCode = "en-us"
 title = "Credibleinterval"
 theme = "hugo-agency-theme"
-relativeURLs = true
 
 
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
