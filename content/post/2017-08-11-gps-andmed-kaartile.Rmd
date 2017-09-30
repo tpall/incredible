@@ -132,7 +132,8 @@ Alternatiivselt võib ligikaudse positsioneerimise tuletada foto tegemise kellaa
 Fotod saab lisada `leaflet`-is markerite popup-idesse, milleks tuleb fotode pathid pakendada HTML-ina, minimaalselt näiteks `<img src="path-to-photo/" />` ja anda funktsioonile pildi koordinaadid.
 ```{r photos, warning=FALSE}
 # Get list of photos
-photos <- list.files("./img/", full.names = TRUE)
+photos <- list.files(full.names = TRUE)
+photos <- photos[str_detect(photos, "2017071")]
 # Function to extract location info from exif data
 exif_location <- function(path) {
   # Read GPS locaton using exiftool
