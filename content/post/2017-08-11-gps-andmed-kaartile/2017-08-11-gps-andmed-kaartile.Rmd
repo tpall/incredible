@@ -2,7 +2,6 @@
 title: GPS andmed kaartile, matka blogi
 author: Taavi Päll
 date: '2017-08-11'
-slug: gps-andmed-kaartile
 categories:
   - R
   - visualiseerimine
