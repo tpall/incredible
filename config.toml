@@ -1,5 +1,5 @@
 # Site settings
-baseurl = "/"
+baseurl = "https://credibleinterval.ee/"
 languageCode = "en-us"
 title = "Credibleinterval"
 theme = "hugo-agency-theme"
