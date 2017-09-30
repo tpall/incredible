@@ -51,8 +51,9 @@ Figure 1: Inimarengu indeksi 1990-2015 tabeli pea. <span class="citation">Tammar
 </p>
 </div>
 <p>Kõigepealt laeme raporti koduleheküljelt alla jutuks oleva tabeli andmetega. Paradoksaalsel kombel on nende andmete esitamine tabeli kujul hea just kättesaadavuse seisukohalt. Andmete kaevamiseks kasutame <code>R</code> programmi paketi <code>rvest</code> funktsioone</p>
-<pre class="r"><code>library(tidyverse)
-library(rvest)
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 3.4.2</code></pre>
+<pre class="r"><code>library(rvest)
 
 url &lt;- &quot;http://inimareng.ee/pohisonumid-eesti-randeajastul/&quot; # link raportile
 page &lt;- read_html(url) # laadime alla põhisõnumite artikli
