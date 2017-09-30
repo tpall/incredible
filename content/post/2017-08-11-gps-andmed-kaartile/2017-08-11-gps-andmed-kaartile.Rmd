@@ -12,7 +12,7 @@ tags:
 ---
 
 ```{r, fig.cap="Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva üle Håra lähedal laagris. Selja taga on kõigest natuke üle 60 km, aga 1260 tõusumeetrit. 17. juuli 2017.", out.width=600, echo=FALSE, fig.align='center'}
-knitr::include_graphics("photos/20170717_222506.jpg")
+knitr::include_graphics("img/20170717_222506.jpg")
 ```
 
 ```{r opts, include=FALSE}
@@ -133,7 +133,7 @@ Alternatiivselt võib ligikaudse positsioneerimise tuletada foto tegemise kellaa
 Fotod saab lisada `leaflet`-is markerite popup-idesse, milleks tuleb fotode pathid pakendada HTML-ina, minimaalselt näiteks `<img src="path-to-photo/" />` ja anda funktsioonile pildi koordinaadid.
 ```{r photos, warning=FALSE}
 # Get list of photos
-photos <- list.files("photos/", full.names = TRUE)
+photos <- list.files("img/", full.names = TRUE)
 # Function to extract location info from exif data
 exif_location <- function(path) {
   # Read GPS locaton using exiftool
