@@ -176,23 +176,23 @@ tracks_merged &lt;- left_join(tracks_merged, photos_location)</code></pre>
 <p>Plotime oma ettevalmistatud andmed kasutades paketti <code>leaflet</code>. <!-- Funktsioon on adapteeritud: http://mhermans.net/hiking-gpx-r-leaflet.html. --> Kaartikihte saab lisada funktsiooniga <code>addTiles</code> või <code>addProviderTiles</code>. Saadaolevaid kaarte näitavad käsud <code>providers</code> ja <code>providers.details</code>.</p>
 <pre class="r"><code># Let&#39;s have a look at some map providers
 sample(providers, 6)</code></pre>
-<pre><code>## $OpenWeatherMap.Snow
-## [1] &quot;OpenWeatherMap.Snow&quot;
+<pre><code>## $OpenMapSurfer
+## [1] &quot;OpenMapSurfer&quot;
 ## 
-## $HERE.pedestrianDay
-## [1] &quot;HERE.pedestrianDay&quot;
+## $HERE.satelliteDay
+## [1] &quot;HERE.satelliteDay&quot;
 ## 
-## $Esri.WorldImagery
-## [1] &quot;Esri.WorldImagery&quot;
+## $OpenMapSurfer.AdminBounds
+## [1] &quot;OpenMapSurfer.AdminBounds&quot;
 ## 
-## $Esri
-## [1] &quot;Esri&quot;
+## $Stamen.TerrainBackground
+## [1] &quot;Stamen.TerrainBackground&quot;
 ## 
-## $OpenStreetMap.France
-## [1] &quot;OpenStreetMap.France&quot;
+## $OpenStreetMap.Mapnik
+## [1] &quot;OpenStreetMap.Mapnik&quot;
 ## 
-## $Thunderforest
-## [1] &quot;Thunderforest&quot;</code></pre>
+## $Thunderforest.OpenCycleMap
+## [1] &quot;Thunderforest.OpenCycleMap&quot;</code></pre>
 <p><code>leaflet</code>-i kaart koostatakse kiht-kihilt. Iga päeva distantsi kanname eraldi kaartile, lisame <em>kõrgusprofiili</em>, legendi ja fotod, kui need on olemas.</p>
 <p>Kõrgusprofiili lisamiseks on <code>leaflet</code> <strong>javascript</strong> programmile olemas <a href="https://github.com/MrMufflon/Leaflet.Elevation">plugin</a> <code>L.control.elevation</code>, mis pole aga R-i jaoks implementeeritud. Lisaks vajab see plugin (<em>loomulikult!</em>) kõrgusinfot, mis paistab minevat kaduma, kui kasutada <code>leaflet.extras</code> paketi funktsiooni <code>addGPX</code> (viimane kasutab leafleti <code>omnivore</code> pluginat, mis GPX andmete puhul kõrgusinfot ei impordi). See tähendab, et tuleb kasutada üht teist <a href="https://github.com/mpetazzoni/leaflet-gpx">leaflet GPX pluginat</a>, mis impordib ka <em>altituudi</em>: <code>leaflet-gpx</code>. Aga ka see plugin pole R-i jaoks implementeeritud. Lahenduseks on need pluginad javascripti kujul leafleti R funktsiooni lisada, nagu on näidatud siin: <a href="https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92" class="uri">https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92</a>, kasutades <code>htmlwidgets::onRender</code> funktsiooni. Soovitav on enne kontrollida veebibrauseris kas lisatav JS ka muidu töötab.</p>
 <div id="api-keys" class="section level4">
