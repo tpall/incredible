@@ -1,5 +1,5 @@
 # Site settings
-baseurl = "/"
+baseurl = "https://band-master-allen-43050.netlify.com"
 languageCode = "en-us"
 title = "Credibleinterval"
 theme = "hugo-agency-theme"
