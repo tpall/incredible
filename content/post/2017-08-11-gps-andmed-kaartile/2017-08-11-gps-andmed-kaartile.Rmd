@@ -13,7 +13,7 @@ tags:
 
 ```{r, echo=FALSE}
 # knitr::include_graphics("img/20170717_222506.jpg")
-blogdown::shortcode("figure", src = "img/20170717_222506.jpg", title = "Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva üle Håra lähedal laagris. Selja taga on kõigest natuke üle 60 km, aga 1260 tõusumeetrit. 17. juuli 2017.", alt = "Ülo ja Intsu joovad teed.")
+blogdown::shortcode("figure", src = "./img/20170717_222506.jpg", title = "Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva üle Håra lähedal laagris. Selja taga on kõigest natuke üle 60 km, aga 1260 tõusumeetrit. 17. juuli 2017.", alt = "Ülo ja Intsu joovad teed.")
 ```
 
 ```{r opts, include=FALSE}
