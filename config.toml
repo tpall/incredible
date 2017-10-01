@@ -71,13 +71,13 @@ googleAnalytics = "UA-100332037-1"
     #  name = "Hugo"
     #  weight = 10
     
-    [[menu.postpend]]
-     url = "https://blog.credibleinterval.ee"
-     name = "R Blog"
-     weight = 10
+    # [[menu.postpend]]
+    # url = "https://blog.credibleinterval.ee"
+    # name = "R Blog"
+    # weight = 10
      
      [[menu.postpend]]
-      name = "Galerii"
+      name = "Blogi"
       weight = 10
       identifier = "post"
       url = "/post/"
