@@ -3,9 +3,6 @@ baseurl = "https://band-master-allen-43050.netlify.com"
 languageCode = "en-us"
 title = "Credibleinterval"
 theme = "hugo-agency-theme"
-relativeURLs = true
-canonifyURLs = true
-# uglyURLs = true
 
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 
