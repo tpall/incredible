@@ -2,6 +2,7 @@
 title: GPS andmed kaartile, matkablogi
 author: Taavi Päll
 date: '2017-08-11'
+slug: gps-leaflet-elevation
 categories:
   - R
   - visualiseerimine
