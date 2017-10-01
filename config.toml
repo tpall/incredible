@@ -11,6 +11,9 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 # Enter your tracking code to enable Google Analytics
 googleAnalytics = "UA-100332037-1"
 
+[permalinks]
+    post = "/:year/:month/:day/:slug/"
+
 [params]
   # You can use Markdown syntax for urls [text](//url.to/source) or
   # most longer texts.
