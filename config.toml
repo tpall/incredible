@@ -1,10 +1,8 @@
 # Site settings
-baseurl = "https://band-master-allen-43050.netlify.com"
+baseurl = "/"
 languageCode = "en-us"
 title = "Credibleinterval"
 theme = "hugo-agency-theme"
-relativeURLs = true
-canonifyURLs = true
 
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 

@@ -2,7 +2,7 @@
 title: GPS andmed kaartile, matkablogi
 author: Taavi Päll
 date: '2017-08-11'
-slug: gps-leaflet-elevation
+url: 'post/2017-08-11-gps-andmed-kaartile/'
 categories:
   - R
   - visualiseerimine
@@ -11,7 +11,7 @@ tags:
   - leaflet.elevation
 ---
 
-```{r, echo=FALSE, fig.cap="Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva üle Håra lähedal laagris. Selja taga on kõigest natuke üle 60 km, aga 1260 tõusumeetrit. 17. juuli 2017.",fig.align='center', fig.width=600}
+```{r, echo=FALSE, fig.cap="Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva üle Håra lähedal laagris. Selja taga on kõigest natuke üle 60 km, aga 1260 tõusumeetrit. 17. juuli 2017.", fig.align='center', out.width=600}
 knitr::include_graphics("img/20170717_222506.jpg")
 ```
 
