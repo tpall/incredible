@@ -62,13 +62,13 @@ Laadime vajalikud library-d ja kaks abifunktsiooni.
 library(tidyverse)
 library(viridis)
 library(stringr)
+library(lubridate)
 library(leaflet)
 library(leaflet.extras) # fullscreen control button
 library(jsonlite)
 library(htmltools)
 library(htmlwidgets)
-source("lib/tidy_gpx.R")
-source("lib/extract_date.R")
+devtools::source_gist("c7f9bcd028fd85eb1cc9ccc7c7317307", filename = "tidy_gpx.R")
 ```
 
 tidy_gpx.R ja extract_date.R skriptid on saadaval minu GitHub repos [tpall/norra2017]( https://github.com/tpall/norra2017/tree/master/lib).
@@ -82,6 +82,9 @@ Lõpuks konverteerin dataframe-d geojson formaati.
 ## List gpx files in data folder
 tracks <- data_frame(gpx_files = list.files("data/", full.names = T))
 ## Extract dates and convert gpx to dataframe
+extract_date <- . %>% 
+  str_replace_all("[[:alpha:][:punct:]]+", "") %>% 
+  ymd_hms() %>% date()
 tracks <- mutate(tracks, date = extract_date(gpx_files),
                  gpx_strings = map(gpx_files, read_file),
                  gpx_df = map(gpx_strings, tidy_gpx))

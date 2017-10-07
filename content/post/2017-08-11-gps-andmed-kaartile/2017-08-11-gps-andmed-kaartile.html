@@ -64,18 +64,21 @@ Figure 1: Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva �
 <pre class="r"><code>library(tidyverse)
 library(viridis)
 library(stringr)
+library(lubridate)
 library(leaflet)
 library(leaflet.extras) # fullscreen control button
 library(jsonlite)
 library(htmltools)
 library(htmlwidgets)
-source(&quot;lib/tidy_gpx.R&quot;)
-source(&quot;lib/extract_date.R&quot;)</code></pre>
+devtools::source_gist(&quot;c7f9bcd028fd85eb1cc9ccc7c7317307&quot;, filename = &quot;tidy_gpx.R&quot;)</code></pre>
 <p>tidy_gpx.R ja extract_date.R skriptid on saadaval minu GitHub repos <a href="https://github.com/tpall/norra2017/tree/master/lib">tpall/norra2017</a>.</p>
 <p>Alustuseks moodustan gpx faili nimedest ja nende nimes olevatest kuupäevadest <code>data_frame</code>-i. Seejärel grupeerin failinimed kuupäevade järgi listidesse ja ühendan omavahel otsapidi iga kuupäeva päevateekonnad. Lisan legendi jaoks tabelisse ka ‘käsitsi’ kokku pandud päevateekondade algus- ja lõpp-punktid. Lõpuks konverteerin dataframe-d geojson formaati.</p>
 <pre class="r"><code>## List gpx files in data folder
 tracks &lt;- data_frame(gpx_files = list.files(&quot;data/&quot;, full.names = T))
 ## Extract dates and convert gpx to dataframe
+extract_date &lt;- . %&gt;% 
+  str_replace_all(&quot;[[:alpha:][:punct:]]+&quot;, &quot;&quot;) %&gt;% 
+  ymd_hms() %&gt;% date()
 tracks &lt;- mutate(tracks, date = extract_date(gpx_files),
                  gpx_strings = map(gpx_files, read_file),
                  gpx_df = map(gpx_strings, tidy_gpx))
@@ -182,23 +185,23 @@ tracks_merged &lt;- left_join(tracks_merged, photos_location)</code></pre>
 <p>Plotime oma ettevalmistatud andmed kasutades paketti <code>leaflet</code>. <!-- Funktsioon on adapteeritud: http://mhermans.net/hiking-gpx-r-leaflet.html. --> Kaartikihte saab lisada funktsiooniga <code>addTiles</code> või <code>addProviderTiles</code>. Saadaolevaid kaarte näitavad käsud <code>providers</code> ja <code>providers.details</code>.</p>
 <pre class="r"><code># Let&#39;s have a look at some map providers
 sample(providers, 6)</code></pre>
-<pre><code>## $Stamen.Watercolor
-## [1] &quot;Stamen.Watercolor&quot;
+<pre><code>## $OpenWeatherMap.Temperature
+## [1] &quot;OpenWeatherMap.Temperature&quot;
 ## 
-## $HikeBike.HillShading
-## [1] &quot;HikeBike.HillShading&quot;
+## $NASAGIBS.ModisTerraChlorophyll
+## [1] &quot;NASAGIBS.ModisTerraChlorophyll&quot;
 ## 
-## $Stamen.TonerBackground
-## [1] &quot;Stamen.TonerBackground&quot;
+## $CartoDB
+## [1] &quot;CartoDB&quot;
 ## 
-## $OpenSeaMap
-## [1] &quot;OpenSeaMap&quot;
+## $MtbMap
+## [1] &quot;MtbMap&quot;
+## 
+## $HERE.hybridDayMobile
+## [1] &quot;HERE.hybridDayMobile&quot;
 ## 
 ## $OpenStreetMap.Mapnik
-## [1] &quot;OpenStreetMap.Mapnik&quot;
-## 
-## $BasemapAT.basemap
-## [1] &quot;BasemapAT.basemap&quot;</code></pre>
+## [1] &quot;OpenStreetMap.Mapnik&quot;</code></pre>
 <p><code>leaflet</code>-i kaart koostatakse kiht-kihilt. Iga päeva distantsi kanname eraldi kaartile, lisame <em>kõrgusprofiili</em>, legendi ja fotod, kui need on olemas.</p>
 <p>Kõrgusprofiili lisamiseks on <code>leaflet</code> <strong>javascript</strong> programmile olemas <a href="https://github.com/MrMufflon/Leaflet.Elevation">plugin</a> <code>L.control.elevation</code>, mis pole aga R-i jaoks implementeeritud. Lisaks vajab see plugin (<em>loomulikult!</em>) kõrgusinfot, mis paistab minevat kaduma, kui kasutada <code>leaflet.extras</code> paketi funktsiooni <code>addGPX</code> (viimane kasutab leafleti <code>omnivore</code> pluginat, mis GPX andmete puhul kõrgusinfot ei impordi). See tähendab, et tuleb kasutada üht teist <a href="https://github.com/mpetazzoni/leaflet-gpx">leaflet GPX pluginat</a>, mis impordib ka <em>altituudi</em>: <code>leaflet-gpx</code>. Aga ka see plugin pole R-i jaoks implementeeritud. Lahenduseks on need pluginad javascripti kujul leafleti R funktsiooni lisada, nagu on näidatud siin: <a href="https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92" class="uri">https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92</a>, kasutades <code>htmlwidgets::onRender</code> funktsiooni. Soovitav on enne kontrollida veebibrauseris kas lisatav JS ka muidu töötab.</p>
 <div id="api-keys" class="section level4">
