@@ -130,8 +130,8 @@ tracks_gat <- tracks_merged %>%
   select(date, trip, asc, desc) %>% 
   gather(key, value, asc, desc)
 
-ggplot(tracks_gat, aes(str_wrap(str_c(date, trip, sep = ", "), 30), value, fill = key)) + 
-  geom_bar(stat = 'identity', position = 'dodge') +
+ggplot(tracks_gat, aes(reorder(str_wrap(str_c(date, trip, sep = ", "), 30), desc(date)), value, fill = key)) + 
+  geom_bar(stat = 'identity', position = 'dodge') + 
   coord_flip() + 
   ylab("Summed value, meters") +
   scale_fill_viridis(discrete = TRUE, labels = c("Ascent", "Descent")) +
