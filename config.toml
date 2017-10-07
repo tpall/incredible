@@ -54,7 +54,7 @@ googleAnalytics = "UA-100332037-1"
   [params.navigation]
     brand = "Credibleinterval"
     # Optional logo as brand stored in img/
-    logo = "logo.svg"
+    logo = "logo_2.svg"
     services = "Teenused"
     portfolio = "Portfolio"
     about = "Info"
@@ -183,7 +183,7 @@ googleAnalytics = "UA-100332037-1"
     center = true
     title = "Meeskond"
     subtitle = ""
-    description = "Taavil on doktorikraad geenitehnoloogia erialal ja pikaajaline laboratoorse uurimistöö kogemus molekulaarse biomeditsiini vallas. Taavi õpetab [R statistika programmi kasutamist andmeanalüüsis](https://tpall.github.io/learn-r/) Tartu Ülikoolis doktorikooli raames ja [Onkobioloogia](https://onkobioloogia.netlify.com) loengut Tallinna Tehnikaülikoolis Keemia- ja biotehnoloogia instituudis."
+    description = "Taavil on doktorikraad geenitehnoloogia erialal ja pikaajaline laboratoorse uurimistöö kogemus molekulaarse biomeditsiini vallas. Taavi õpetab [R statistika programmi kasutamist andmeanalüüsis](https://github.com/rstats-tartu) Tartu Ülikoolis doktorikooli raames ja [Onkobioloogia](https://onkobioloogia.credibleinterval.ee) loengut Tallinna Tehnikaülikoolis Keemia- ja biotehnoloogia instituudis."
 
     # All team member's pictures are stored under 'static/img/team'.
     # Replace them with your own too.

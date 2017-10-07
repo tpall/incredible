@@ -33,6 +33,7 @@ tags:
 <link href="/rmarkdown-libs/fontawesome/font-awesome.min.css" rel="stylesheet" />
 
 
+<p>Nagu meil on juba pikemalt traditsiooniks, käisime ka sellel aastal matkal, täpsemalt rattamatkal. Sellel aastal jätkasime Norra avastamist. <strong>Jube tore oleks peale matka kokku panna piltitega matkablogi kus oleks olemas ka läbitud tegelik marsruut.</strong> Seda võib teha käsitsi, kuid alati ei ole võimalik marsruuti mälu järgi täpselt taastada. Eriti kui marsruut ei järgi kaartidel olevaid teid. Siin tulevad appi igasugused nutiseadmed.</p>
 <div class="figure" style="text-align: center"><span id="fig:unnamed-chunk-1"></span>
 <img src="img/20170717_222506.jpg" alt="Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva üle Håra lähedal laagris. Selja taga on kõigest natuke üle 60 km, aga 1260 tõusumeetrit. 17. juuli 2017." width="600" />
 <p class="caption">
@@ -46,13 +47,17 @@ Figure 1: Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva �
 <div id="trakkimine" class="section level2">
 <h2>Träkkimine</h2>
 <p>Jalgrattamarsruuti träkkisin Suunto Ambit 2 kellaga. Aku tööaja pikendamiseks kasutasin 10 s salvestusintervalle ja ‘OK’ GPS täpsussetingut, mis peaks tagama ~50 tunnise patarei kasutusaja. Pika salvestusintervalli tõttu ei jookse GPS rada kaartile panduna alati täpselt mööda teid, vaid kipub kurve sirgeks lõikama, mis on muidugi minoorne puudus.</p>
+<blockquote>
 <p>Proovime selle marsruudi päevade kaupa kokku panna ja kaartile joonistada koos kõrgusprofiiliga.</p>
+</blockquote>
 </div>
 <div id="gps-rada-kaartile" class="section level2">
 <h2>GPS rada kaartile</h2>
 <p>Tegelikult piisab selleks mõnest koodireast, kui kasutada R pakette <code>leaflet</code> ja <code>leaflet.extras</code>. Kõige pealt laadin Suunto Movescount võrgulehelt alla .gpx <em>track</em> failid ja salvestan nad oma arvutisse kataloogi nimega <code>data/</code>.</p>
+<p>Asi läheb väheke keerulisemaks, kui on soov ka kõrgusinfo kaartile lisada. Kõrgusinfo lisamine pole “leaflet” R paketis implementeeritud. Samas on olemas “Leaflet.elevation” javascript plugin: <a href="http://mrmufflon.github.io/Leaflet.Elevation/" class="uri">http://mrmufflon.github.io/Leaflet.Elevation/</a>.</p>
 <p><em>GPX failidest saab importida R-i GPS andmed GIS formaati näiteks kasutades <code>readOGR</code> funktsiooni paketist <code>rgdal</code>.</em> <em>Imporditud rajajooned/rajapunktid on <code>Spatial</code> klassi objektid, mida saab siis R-is edasi töödelda ja analüüsida kasutades näiteks <code>sp</code> või <code>rgdal</code> paketi tööriistu.</em></p>
-<p>Mina kavatsen aga kasutada otse GPX andmete lisamiseks <code>leaflet</code> kaartile <code>leaflet.extras</code> paketi funktsiooni <code>addGPX</code>, mis võtab andmed kas <strong>a)</strong> gpx failist või <strong>b)</strong> gpx xml stringist (pikk xml formaadis lause). Niimoodi saan ma kasutada algseid andmeid ja jääb ära andmete vahepealne konverteerimine <code>SpatialLines</code>, <code>SpatialPointsDataFrame</code> või muusse sellisesse objekti.</p>
+<p>Mina kavatsesin algselt aga kasutada otse GPX andmete lisamiseks <code>leaflet</code> kaartile <code>leaflet.extras</code> paketi funktsiooni <code>addGPX()</code>, mis võtab andmed kas <strong>a)</strong> gpx failist või <strong>b)</strong> gpx xml stringist (pikk xml formaadis lause). Niimoodi oleksin ma saanud kasutada algseid andmeid ja vältinud andmete vahepealset konverteeriminst <code>SpatialLines</code>, <code>SpatialPointsDataFrame</code> või muusse sellisesse objekti.</p>
+<p>Oleks on paha poiss. Tegelikult ma lõpuks vältisin oma andmete spatial klassi eksportimist, kuid ei kasutanud ka <code>addGPX()</code> formaati, sest mul oli vaja päevateekonnad mitmest trackist kokku panna ja selgus, et macis ei ole “Gpsbabel” programmi, mis seda teeb, võimalik niisama lihtsalt R-i kaudu käivitada kui näiteks Linuxis. Seetõttu loobusin üldse gpx formaaadist ja liitsin andmed lihtsate andmeraamidena ja <strong>eksportisin oma andmed geojson formaati</strong>, kus sain neid leafletis ilusti kasutada.</p>
 <div id="kui-on-soov-eri-failides-olevaid-radasid-uhendada" class="section level3">
 <h3>Kui on soov eri failides olevaid radasid ühendada</h3>
 <p>Mõnel päeval salvestasin ma mitu träkki: näiteks enne lõunapausi ja peale lõunapausi. Liidan need träkid päevakaupa kokku.</p>
@@ -68,7 +73,7 @@ library(htmltools)
 library(htmlwidgets)
 source(&quot;lib/tidy_gpx.R&quot;)
 source(&quot;lib/extract_date.R&quot;)</code></pre>
-<p>Alustuseks moodustan gpx faili nimedest ja nende nimes olevatest kuupäevadest <code>data_frame</code>-i. Seejärel grupeerin failinimed kuupäevade järgi listidesse ja ühendan omavahel otsapidi iga kuupäeva päevateekonnad. Lisan legendi jaoks tabelisse ka ‘käsitsi’ kokku pandud päevateekondade algus- ja lõpp-punktid. Lõpuks konverteerin dataframe-d json formaati.</p>
+<p>Alustuseks moodustan gpx faili nimedest ja nende nimes olevatest kuupäevadest <code>data_frame</code>-i. Seejärel grupeerin failinimed kuupäevade järgi listidesse ja ühendan omavahel otsapidi iga kuupäeva päevateekonnad. Lisan legendi jaoks tabelisse ka ‘käsitsi’ kokku pandud päevateekondade algus- ja lõpp-punktid. Lõpuks konverteerin dataframe-d geojson formaati.</p>
 <pre class="r"><code>## List gpx files in data folder
 tracks &lt;- data_frame(gpx_files = list.files(&quot;data/&quot;, full.names = T))
 ## Extract dates and convert gpx to dataframe
@@ -129,10 +134,12 @@ ggplot(tracks_gat, aes(str_wrap(paste(date, trip, sep = &quot;, &quot;), 30), va
 Figure 2: Summaarne päeva tõus ja laskumine.
 </p>
 </div>
+<p>Väga lahe! Keskmiselt tuli iga päev 942 m tõusu ja 1041 m allamäge. Nii et peamiselt ikka vähe rohkem nagu allamäge:-)</p>
 </div>
 <div id="lisame-kaartile-fotod" class="section level3">
 <h3>Lisame kaartile fotod</h3>
-<p>Lisan tabelisse ka matka jooksul paar telefoniga tehtud tehtud fotot, millel on positsiooni info olemas. Positsiooneerimisinfo võtan fotode infost välja kasutades käsureaprogrammi <code>exiftool</code>, mille olen jälle pakendanud R-i funktsioonina: <code>exif_location</code>. Alternatiivselt võib ligikaudse positsioneerimise tuletada foto tegemise kellaajast. Fotod saab lisada <code>leaflet</code>-is markerite popup-idesse, milleks tuleb fotode pathid pakendada HTML-ina, minimaalselt näiteks <code>&lt;img src=&quot;path-to-photo/&quot; /&gt;</code> ja anda funktsioonile pildi koordinaadid.</p>
+<p>Lisan tabelisse ka matka jooksul paar telefoniga tehtud tehtud fotot, millel on positsiooni info olemas. Positsiooneerimisinfo võtan fotode infost välja kasutades käsureaprogrammi “exiftool”, mille olen jälle pakendanud oma R-i funktsioonina: <code>exif_location()</code>. Minu õnn, et “exiftool” töötab samamoodi nii Linuxis kui macis. Alternatiivselt võib ligikaudse positsioneerimise tuletada foto tegemise kellaajast.</p>
+<p>Fotod saab lisada <code>leaflet</code>-is markerite popup-idesse, milleks tuleb fotode pathid pakendada HTML-ina, minimaalselt näiteks <code>&lt;img src=&quot;path-to-photo/&quot; /&gt;</code> ja anda funktsioonile pildi koordinaadid.</p>
 <pre class="r"><code># Get list of photos
 photos &lt;- list.files(&quot;img/&quot;, full.names = TRUE)
 # Function to extract location info from exif data
@@ -176,28 +183,29 @@ tracks_merged &lt;- left_join(tracks_merged, photos_location)</code></pre>
 <p>Plotime oma ettevalmistatud andmed kasutades paketti <code>leaflet</code>. <!-- Funktsioon on adapteeritud: http://mhermans.net/hiking-gpx-r-leaflet.html. --> Kaartikihte saab lisada funktsiooniga <code>addTiles</code> või <code>addProviderTiles</code>. Saadaolevaid kaarte näitavad käsud <code>providers</code> ja <code>providers.details</code>.</p>
 <pre class="r"><code># Let&#39;s have a look at some map providers
 sample(providers, 6)</code></pre>
-<pre><code>## $Thunderforest.Outdoors
-## [1] &quot;Thunderforest.Outdoors&quot;
+<pre><code>## $Stamen.TonerHybrid
+## [1] &quot;Stamen.TonerHybrid&quot;
 ## 
-## $OpenWeatherMap
-## [1] &quot;OpenWeatherMap&quot;
+## $OpenStreetMap.HOT
+## [1] &quot;OpenStreetMap.HOT&quot;
 ## 
-## $NASAGIBS.ModisTerraBands367CR
-## [1] &quot;NASAGIBS.ModisTerraBands367CR&quot;
+## $Esri
+## [1] &quot;Esri&quot;
 ## 
-## $HERE.normalDayGreyMobile
-## [1] &quot;HERE.normalDayGreyMobile&quot;
+## $OpenMapSurfer.Grayscale
+## [1] &quot;OpenMapSurfer.Grayscale&quot;
 ## 
-## $Esri.WorldTerrain
-## [1] &quot;Esri.WorldTerrain&quot;
+## $OpenWeatherMap.Temperature
+## [1] &quot;OpenWeatherMap.Temperature&quot;
 ## 
-## $HERE.normalNightGrey
-## [1] &quot;HERE.normalNightGrey&quot;</code></pre>
+## $CartoDB
+## [1] &quot;CartoDB&quot;</code></pre>
 <p><code>leaflet</code>-i kaart koostatakse kiht-kihilt. Iga päeva distantsi kanname eraldi kaartile, lisame <em>kõrgusprofiili</em>, legendi ja fotod, kui need on olemas.</p>
 <p>Kõrgusprofiili lisamiseks on <code>leaflet</code> <strong>javascript</strong> programmile olemas <a href="https://github.com/MrMufflon/Leaflet.Elevation">plugin</a> <code>L.control.elevation</code>, mis pole aga R-i jaoks implementeeritud. Lisaks vajab see plugin (<em>loomulikult!</em>) kõrgusinfot, mis paistab minevat kaduma, kui kasutada <code>leaflet.extras</code> paketi funktsiooni <code>addGPX</code> (viimane kasutab leafleti <code>omnivore</code> pluginat, mis GPX andmete puhul kõrgusinfot ei impordi). See tähendab, et tuleb kasutada üht teist <a href="https://github.com/mpetazzoni/leaflet-gpx">leaflet GPX pluginat</a>, mis impordib ka <em>altituudi</em>: <code>leaflet-gpx</code>. Aga ka see plugin pole R-i jaoks implementeeritud. Lahenduseks on need pluginad javascripti kujul leafleti R funktsiooni lisada, nagu on näidatud siin: <a href="https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92" class="uri">https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92</a>, kasutades <code>htmlwidgets::onRender</code> funktsiooni. Soovitav on enne kontrollida veebibrauseris kas lisatav JS ka muidu töötab.</p>
 <div id="api-keys" class="section level4">
 <h4>API keys</h4>
 <p>Mitmed kaartikihtide pakkujad nt. <a href="https://www.thunderforest.com">thunderforest</a> tahavad registreerimist. Ilma registreerimiseta näidatakse kaartil tüütut vesimärki. Thunderforestil on väikeses mahus kasutamine tasuta ja registreerimisel antakse unikaalne API key, mis tuleb kaarti URL-i lõppu lisada kujul <code>?apikey=your-unique-apikey</code> (vt. ka allpool olevat koodi). Et mitte oma isiklikku apikey-d tervele internetile avalikuks teha, tuleks see lisada R-i <em>environment variable-ks</em>, kust selle saab kätte kasutades käsku <code>Sys.getenv()</code>. Käimasolevasse R-i sessiooni <em>environmenti</em> saab apikey lisada kasutades <code>Sys.setenv(THUNDERF_APIKEY = &quot;your-unique-apikey&quot;)</code> käsku (thunderforest-i näitel). Sellisel juhul läheb see R-ist väljumisel muidugi kaotsi ja tuleb taaskäivitamisel uuesti lisada. Permanentselt saab sellise apikey lisada oma R-i environmenti kirjutades selle rea (THUNDERF_APIKEY = “your-unique-apikey”) .Renviron faili.</p>
+<p>Siin ma panen kokku funktsiooni <code>plot_trip2()</code>, mida kasutan iga päeva teekonna visualiseerimiseks.</p>
 <pre class="r"><code># Use fa icon
 icon_fa_camera &lt;- makeAwesomeIcon(icon = &#39;camera&#39;, 
                                   markerColor = &#39;red&#39;,

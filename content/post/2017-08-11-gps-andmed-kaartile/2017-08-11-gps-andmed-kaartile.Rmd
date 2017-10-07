@@ -11,6 +11,14 @@ tags:
   - leaflet.elevation
 ---
 
+Nagu meil on juba pikemalt traditsiooniks, käisime ka sellel aastal matkal, täpsemalt rattamatkal. 
+Sellel aastal jätkasime Norra avastamist.
+__Jube tore oleks peale matka kokku panna piltitega matkablogi kus oleks olemas ka läbitud tegelik marsruut.__
+Seda võib teha käsitsi, kuid alati ei ole võimalik marsruuti mälu järgi täpselt taastada. 
+Eriti kui marsruut ei järgi kaartidel olevaid teid. 
+Siin tulevad appi igasugused nutiseadmed.
+
+
 ```{r, echo=FALSE, fig.cap="Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva üle Håra lähedal laagris. Selja taga on kõigest natuke üle 60 km, aga 1260 tõusumeetrit. 17. juuli 2017.", fig.align='center', out.width=600}
 knitr::include_graphics("img/20170717_222506.jpg")
 ```
@@ -30,17 +38,27 @@ Jalgrattamarsruuti träkkisin Suunto Ambit 2 kellaga.
 Aku tööaja pikendamiseks kasutasin 10 s salvestusintervalle ja 'OK' GPS täpsussetingut, mis peaks tagama ~50 tunnise patarei kasutusaja.
 Pika salvestusintervalli tõttu ei jookse GPS rada kaartile panduna alati täpselt mööda teid, vaid kipub kurve sirgeks lõikama, mis on muidugi minoorne puudus.    
 
-Proovime selle marsruudi päevade kaupa kokku panna ja kaartile joonistada koos kõrgusprofiiliga.
+>Proovime selle marsruudi päevade kaupa kokku panna ja kaartile joonistada koos kõrgusprofiiliga.
 
 ## GPS rada kaartile
 Tegelikult piisab selleks mõnest koodireast, kui kasutada R pakette `leaflet` ja `leaflet.extras`.
 Kõige pealt laadin Suunto Movescount võrgulehelt alla .gpx _track_ failid ja salvestan nad oma arvutisse kataloogi nimega `data/`.   
 
+Asi läheb väheke keerulisemaks, kui on soov ka kõrgusinfo kaartile lisada.
+Kõrgusinfo lisamine pole "leaflet" R paketis implementeeritud.
+Samas on olemas "Leaflet.elevation" javascript plugin: http://mrmufflon.github.io/Leaflet.Elevation/.
+
+
 _GPX failidest saab importida R-i GPS andmed GIS formaati näiteks kasutades `readOGR` funktsiooni paketist `rgdal`._
 _Imporditud rajajooned/rajapunktid on `Spatial` klassi objektid, mida saab siis R-is edasi töödelda ja analüüsida kasutades näiteks `sp` või `rgdal` paketi tööriistu._   
 
-Mina kavatsen aga kasutada otse GPX andmete lisamiseks `leaflet` kaartile `leaflet.extras` paketi funktsiooni `addGPX`, mis võtab andmed kas __a)__ gpx failist või __b)__ gpx xml stringist (pikk xml formaadis lause).
-Niimoodi saan ma kasutada algseid andmeid ja jääb ära andmete vahepealne konverteerimine `SpatialLines`, `SpatialPointsDataFrame` või muusse sellisesse objekti.  
+Mina kavatsesin algselt aga kasutada otse GPX andmete lisamiseks `leaflet` kaartile `leaflet.extras` paketi funktsiooni `addGPX()`, mis võtab andmed kas __a)__ gpx failist või __b)__ gpx xml stringist (pikk xml formaadis lause).
+Niimoodi oleksin ma saanud kasutada algseid andmeid ja vältinud andmete vahepealset konverteeriminst `SpatialLines`, `SpatialPointsDataFrame` või muusse sellisesse objekti.
+
+
+Oleks on paha poiss.
+Tegelikult ma lõpuks vältisin oma andmete spatial klassi eksportimist, kuid ei kasutanud ka `addGPX()` formaati, sest mul oli vaja päevateekonnad mitmest trackist kokku panna ja selgus, et macis ei ole "Gpsbabel" programmi, mis seda teeb, võimalik niisama lihtsalt R-i kaudu käivitada kui näiteks Linuxis.
+Seetõttu loobusin üldse gpx formaaadist ja liitsin andmed lihtsate andmeraamidena ja **eksportisin oma andmed geojson formaati**, kus sain neid leafletis ilusti kasutada.
 
 ### Kui on soov eri failides olevaid radasid ühendada
 Mõnel päeval salvestasin ma mitu träkki: näiteks enne lõunapausi ja peale lõunapausi.
@@ -63,7 +81,7 @@ source("lib/extract_date.R")
 Alustuseks moodustan gpx faili nimedest ja nende nimes olevatest kuupäevadest `data_frame`-i.
 Seejärel grupeerin failinimed kuupäevade järgi listidesse ja ühendan omavahel otsapidi iga kuupäeva päevateekonnad.
 Lisan legendi jaoks tabelisse ka 'käsitsi' kokku pandud päevateekondade algus- ja lõpp-punktid.
-Lõpuks konverteerin dataframe-d json formaati.
+Lõpuks konverteerin dataframe-d geojson formaati.
 
 ```{r import-gpx-tracks}
 ## List gpx files in data folder
@@ -125,12 +143,25 @@ ggplot(tracks_gat, aes(str_wrap(paste(date, trip, sep = ", "), 30), value, fill 
         legend.background = element_blank())
 ```
 
+```{r, echo=FALSE}
+tracks_sum <- tracks_gat %>% 
+  group_by(key) %>% 
+  summarise(ave = round(mean(value)))
+```
+
+
+Väga lahe! Keskmiselt tuli iga päev `r tracks_sum$ave[1]` m tõusu ja `r tracks_sum$ave[2]` m allamäge. 
+Nii et peamiselt ikka vähe rohkem nagu allamäge:-)
 
 ### Lisame kaartile fotod
 Lisan tabelisse ka matka jooksul paar telefoniga tehtud tehtud fotot, millel on positsiooni info olemas.
-Positsiooneerimisinfo võtan fotode infost välja kasutades käsureaprogrammi `exiftool`, mille olen jälle pakendanud R-i funktsioonina: `exif_location`.
+Positsiooneerimisinfo võtan fotode infost välja kasutades käsureaprogrammi "exiftool", mille olen jälle pakendanud oma R-i funktsioonina: `exif_location()`.
+Minu õnn, et "exiftool" töötab samamoodi nii Linuxis kui macis.
 Alternatiivselt võib ligikaudse positsioneerimise tuletada foto tegemise kellaajast.
+
+
 Fotod saab lisada `leaflet`-is markerite popup-idesse, milleks tuleb fotode pathid pakendada HTML-ina, minimaalselt näiteks `<img src="path-to-photo/" />` ja anda funktsioonile pildi koordinaadid.
+
 ```{r photos, warning=FALSE}
 # Get list of photos
 photos <- list.files("img/", full.names = TRUE)
@@ -200,6 +231,8 @@ Käimasolevasse R-i sessiooni _environmenti_ saab apikey lisada kasutades `Sys.s
 Sellisel juhul läheb see R-ist väljumisel muidugi kaotsi ja tuleb taaskäivitamisel uuesti lisada.
 Permanentselt saab sellise apikey lisada oma R-i environmenti kirjutades selle rea (THUNDERF_APIKEY = "your-unique-apikey") .Renviron faili.
 
+
+Siin ma panen kokku funktsiooni `plot_trip2()`, mida kasutan iga päeva teekonna visualiseerimiseks.
 ```{r plot-trip-fun}
 # Use fa icon
 icon_fa_camera <- makeAwesomeIcon(icon = 'camera', 
