@@ -83,7 +83,7 @@ Lõpuks konverteerin dataframe-d geojson formaati.
 tracks <- data_frame(gpx_files = list.files("data/", full.names = T))
 ## Extract dates and convert gpx to dataframe
 extract_date <- . %>% 
-  str_replace_all("[[:alpha:][:punct:]]+", "") %>% 
+  str_extract_all("[[:digit:]]+") %>% 
   ymd_hms() %>% date()
 tracks <- mutate(tracks, date = extract_date(gpx_files),
                  gpx_strings = map(gpx_files, read_file),
