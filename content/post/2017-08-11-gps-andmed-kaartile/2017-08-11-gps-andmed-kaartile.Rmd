@@ -125,8 +125,9 @@ Kasutades gpx kõrgusandmeid (`ele`) arvutame kui palju sai iga päev mäest ül
 ## Calculate daily asc and desc
 tracks_gat <- tracks_merged %>% 
   mutate(ele = map(gpx_df, "ele"),
-         asc = map_dbl(ele, ~sum(diff(.x)[diff(.x)>0])),
-         desc = map_dbl(ele, ~abs(sum(diff(.x)[diff(.x)<0])))) %>% 
+         ele_diffs = map(ele, diff),
+         asc = map_dbl(ele_diffs, ~ sum(.x[.x > 0])),
+         desc = map_dbl(ele_diffs, ~ sum(-.x[.x < 0]))) %>% 
   select(date, trip, asc, desc) %>% 
   gather(key, value, asc, desc)
 
