@@ -53,18 +53,16 @@ Figure 1: Ronimine meile meeldib! Ülo ja Intsu mõtisklevad möödunud päeva �
 </div>
 <div id="gps-rada-kaartile" class="section level2">
 <h2>GPS rada kaartile</h2>
-<p>Tegelikult piisab selleks mõnest koodireast, kui kasutada R pakette <code>leaflet</code> ja <code>leaflet.extras</code>. Kõige pealt laadin Suunto Movescount võrgulehelt alla .gpx <em>track</em> failid ja salvestan nad oma arvutisse kataloogi nimega <code>data/</code>.</p>
+<p>Tegelikult piisab selleks mõnest koodireast, kui kasutada R pakette “leaflet” ja “leaflet.extras”. Kõige pealt laadin Suunto Movescount võrgulehelt alla .gpx <em>track</em> failid ja salvestan nad oma arvutisse kataloogi nimega <code>data/</code>.</p>
 <p>Asi läheb väheke keerulisemaks, kui on soov ka kõrgusinfo kaartile lisada. Kõrgusinfo lisamine pole “leaflet” R paketis implementeeritud. Samas on olemas “Leaflet.elevation” javascript plugin: <a href="http://mrmufflon.github.io/Leaflet.Elevation/" class="uri">http://mrmufflon.github.io/Leaflet.Elevation/</a>.</p>
-<p><em>GPX failidest saab importida R-i GPS andmed GIS formaati näiteks kasutades <code>readOGR</code> funktsiooni paketist <code>rgdal</code>.</em> <em>Imporditud rajajooned/rajapunktid on <code>Spatial</code> klassi objektid, mida saab siis R-is edasi töödelda ja analüüsida kasutades näiteks <code>sp</code> või <code>rgdal</code> paketi tööriistu.</em></p>
-<p>Mina kavatsesin algselt aga kasutada otse GPX andmete lisamiseks <code>leaflet</code> kaartile <code>leaflet.extras</code> paketi funktsiooni <code>addGPX()</code>, mis võtab andmed kas <strong>a)</strong> gpx failist või <strong>b)</strong> gpx xml stringist (pikk xml formaadis lause). Niimoodi oleksin ma saanud kasutada algseid andmeid ja vältinud andmete vahepealset konverteeriminst <code>SpatialLines</code>, <code>SpatialPointsDataFrame</code> või muusse sellisesse objekti.</p>
-<p>Oleks on paha poiss. Tegelikult ma lõpuks vältisin oma andmete spatial klassi eksportimist, kuid ei kasutanud ka <code>addGPX()</code> formaati, sest mul oli vaja päevateekonnad mitmest trackist kokku panna ja selgus, et macis ei ole “Gpsbabel” programmi, mis seda teeb, võimalik niisama lihtsalt R-i kaudu käivitada kui näiteks Linuxis. Seetõttu loobusin üldse gpx formaaadist ja liitsin andmed lihtsate andmeraamidena ja <strong>eksportisin oma andmed geojson formaati</strong>, kus sain neid leafletis ilusti kasutada.</p>
+<p>Peale mõningast ekskurssi GPX ja “gpsbabel”-i maadele loobusin koodi portatiivsuse huvides GPX formaadi kasutamise mõttest, sest selgus et gpsbabelit pole võimalik sama moodi läbi R koodi erinevates operatsisoonisüsteemides (Linux vs macOS) välja kutsuda.</p>
+<p>Seega, otsustasin kasutada javascripti. Javascripti jaoks liitsin sama päeva andmed lihtsate andmeraamidena ja <strong>eksportisin oma andmed geojson formaati</strong>, kus sain neid leafletis ilusti kasutada.</p>
 <div id="kui-on-soov-eri-failides-olevaid-radasid-uhendada" class="section level3">
 <h3>Kui on soov eri failides olevaid radasid ühendada</h3>
 <p>Mõnel päeval salvestasin ma mitu träkki: näiteks enne lõunapausi ja peale lõunapausi. Liidan need träkid päevakaupa kokku.</p>
 <p>Laadime vajalikud library-d ja kaks abifunktsiooni.</p>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 3.4.2</code></pre>
-<pre class="r"><code>library(viridis)
+<pre class="r"><code>library(tidyverse)
+library(viridis)
 library(stringr)
 library(leaflet)
 library(leaflet.extras) # fullscreen control button
@@ -73,6 +71,7 @@ library(htmltools)
 library(htmlwidgets)
 source(&quot;lib/tidy_gpx.R&quot;)
 source(&quot;lib/extract_date.R&quot;)</code></pre>
+<p>tidy_gpx.R ja extract_date.R skriptid on saadaval minu GitHub repos <a href="https://github.com/tpall/norra2017/tree/master/lib">tpall/norra2017</a>.</p>
 <p>Alustuseks moodustan gpx faili nimedest ja nende nimes olevatest kuupäevadest <code>data_frame</code>-i. Seejärel grupeerin failinimed kuupäevade järgi listidesse ja ühendan omavahel otsapidi iga kuupäeva päevateekonnad. Lisan legendi jaoks tabelisse ka ‘käsitsi’ kokku pandud päevateekondade algus- ja lõpp-punktid. Lõpuks konverteerin dataframe-d geojson formaati.</p>
 <pre class="r"><code>## List gpx files in data folder
 tracks &lt;- data_frame(gpx_files = list.files(&quot;data/&quot;, full.names = T))
@@ -120,7 +119,7 @@ tracks_gat &lt;- tracks_merged %&gt;%
   select(date, trip, asc, desc) %&gt;% 
   gather(key, value, asc, desc)
 
-ggplot(tracks_gat, aes(str_wrap(paste(date, trip, sep = &quot;, &quot;), 30), value, fill = key)) + 
+ggplot(tracks_gat, aes(str_wrap(str_c(date, trip, sep = &quot;, &quot;), 30), value, fill = key)) + 
   geom_bar(stat = &#39;identity&#39;, position = &#39;dodge&#39;) +
   coord_flip() + 
   ylab(&quot;Summed value, meters&quot;) +
@@ -183,23 +182,23 @@ tracks_merged &lt;- left_join(tracks_merged, photos_location)</code></pre>
 <p>Plotime oma ettevalmistatud andmed kasutades paketti <code>leaflet</code>. <!-- Funktsioon on adapteeritud: http://mhermans.net/hiking-gpx-r-leaflet.html. --> Kaartikihte saab lisada funktsiooniga <code>addTiles</code> või <code>addProviderTiles</code>. Saadaolevaid kaarte näitavad käsud <code>providers</code> ja <code>providers.details</code>.</p>
 <pre class="r"><code># Let&#39;s have a look at some map providers
 sample(providers, 6)</code></pre>
-<pre><code>## $Stamen.TonerHybrid
-## [1] &quot;Stamen.TonerHybrid&quot;
+<pre><code>## $Stamen.Watercolor
+## [1] &quot;Stamen.Watercolor&quot;
 ## 
-## $OpenStreetMap.HOT
-## [1] &quot;OpenStreetMap.HOT&quot;
+## $HikeBike.HillShading
+## [1] &quot;HikeBike.HillShading&quot;
 ## 
-## $Esri
-## [1] &quot;Esri&quot;
+## $Stamen.TonerBackground
+## [1] &quot;Stamen.TonerBackground&quot;
 ## 
-## $OpenMapSurfer.Grayscale
-## [1] &quot;OpenMapSurfer.Grayscale&quot;
+## $OpenSeaMap
+## [1] &quot;OpenSeaMap&quot;
 ## 
-## $OpenWeatherMap.Temperature
-## [1] &quot;OpenWeatherMap.Temperature&quot;
+## $OpenStreetMap.Mapnik
+## [1] &quot;OpenStreetMap.Mapnik&quot;
 ## 
-## $CartoDB
-## [1] &quot;CartoDB&quot;</code></pre>
+## $BasemapAT.basemap
+## [1] &quot;BasemapAT.basemap&quot;</code></pre>
 <p><code>leaflet</code>-i kaart koostatakse kiht-kihilt. Iga päeva distantsi kanname eraldi kaartile, lisame <em>kõrgusprofiili</em>, legendi ja fotod, kui need on olemas.</p>
 <p>Kõrgusprofiili lisamiseks on <code>leaflet</code> <strong>javascript</strong> programmile olemas <a href="https://github.com/MrMufflon/Leaflet.Elevation">plugin</a> <code>L.control.elevation</code>, mis pole aga R-i jaoks implementeeritud. Lisaks vajab see plugin (<em>loomulikult!</em>) kõrgusinfot, mis paistab minevat kaduma, kui kasutada <code>leaflet.extras</code> paketi funktsiooni <code>addGPX</code> (viimane kasutab leafleti <code>omnivore</code> pluginat, mis GPX andmete puhul kõrgusinfot ei impordi). See tähendab, et tuleb kasutada üht teist <a href="https://github.com/mpetazzoni/leaflet-gpx">leaflet GPX pluginat</a>, mis impordib ka <em>altituudi</em>: <code>leaflet-gpx</code>. Aga ka see plugin pole R-i jaoks implementeeritud. Lahenduseks on need pluginad javascripti kujul leafleti R funktsiooni lisada, nagu on näidatud siin: <a href="https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92" class="uri">https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92</a>, kasutades <code>htmlwidgets::onRender</code> funktsiooni. Soovitav on enne kontrollida veebibrauseris kas lisatav JS ka muidu töötab.</p>
 <div id="api-keys" class="section level4">

@@ -41,31 +41,24 @@ Pika salvestusintervalli tõttu ei jookse GPS rada kaartile panduna alati täpse
 >Proovime selle marsruudi päevade kaupa kokku panna ja kaartile joonistada koos kõrgusprofiiliga.
 
 ## GPS rada kaartile
-Tegelikult piisab selleks mõnest koodireast, kui kasutada R pakette `leaflet` ja `leaflet.extras`.
+Tegelikult piisab selleks mõnest koodireast, kui kasutada R pakette "leaflet" ja "leaflet.extras".
 Kõige pealt laadin Suunto Movescount võrgulehelt alla .gpx _track_ failid ja salvestan nad oma arvutisse kataloogi nimega `data/`.   
 
 Asi läheb väheke keerulisemaks, kui on soov ka kõrgusinfo kaartile lisada.
 Kõrgusinfo lisamine pole "leaflet" R paketis implementeeritud.
 Samas on olemas "Leaflet.elevation" javascript plugin: http://mrmufflon.github.io/Leaflet.Elevation/.
 
+Peale mõningast ekskurssi GPX ja "gpsbabel"-i maadele loobusin koodi portatiivsuse huvides GPX formaadi kasutamise mõttest, sest selgus et gpsbabelit pole võimalik sama moodi läbi R koodi erinevates operatsisoonisüsteemides (Linux vs macOS) välja kutsuda.
 
-_GPX failidest saab importida R-i GPS andmed GIS formaati näiteks kasutades `readOGR` funktsiooni paketist `rgdal`._
-_Imporditud rajajooned/rajapunktid on `Spatial` klassi objektid, mida saab siis R-is edasi töödelda ja analüüsida kasutades näiteks `sp` või `rgdal` paketi tööriistu._   
-
-Mina kavatsesin algselt aga kasutada otse GPX andmete lisamiseks `leaflet` kaartile `leaflet.extras` paketi funktsiooni `addGPX()`, mis võtab andmed kas __a)__ gpx failist või __b)__ gpx xml stringist (pikk xml formaadis lause).
-Niimoodi oleksin ma saanud kasutada algseid andmeid ja vältinud andmete vahepealset konverteeriminst `SpatialLines`, `SpatialPointsDataFrame` või muusse sellisesse objekti.
-
-
-Oleks on paha poiss.
-Tegelikult ma lõpuks vältisin oma andmete spatial klassi eksportimist, kuid ei kasutanud ka `addGPX()` formaati, sest mul oli vaja päevateekonnad mitmest trackist kokku panna ja selgus, et macis ei ole "Gpsbabel" programmi, mis seda teeb, võimalik niisama lihtsalt R-i kaudu käivitada kui näiteks Linuxis.
-Seetõttu loobusin üldse gpx formaaadist ja liitsin andmed lihtsate andmeraamidena ja **eksportisin oma andmed geojson formaati**, kus sain neid leafletis ilusti kasutada.
+Seega, otsustasin kasutada javascripti.
+Javascripti jaoks liitsin sama päeva andmed lihtsate andmeraamidena ja **eksportisin oma andmed geojson formaati**, kus sain neid leafletis ilusti kasutada.
 
 ### Kui on soov eri failides olevaid radasid ühendada
 Mõnel päeval salvestasin ma mitu träkki: näiteks enne lõunapausi ja peale lõunapausi.
 Liidan need träkid päevakaupa kokku.
 
 Laadime vajalikud library-d ja kaks abifunktsiooni.
-```{r libraries, message=FALSE}
+```{r libraries, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(viridis)
 library(stringr)
@@ -77,6 +70,8 @@ library(htmlwidgets)
 source("lib/tidy_gpx.R")
 source("lib/extract_date.R")
 ```
+
+tidy_gpx.R ja extract_date.R skriptid on saadaval minu GitHub repos [tpall/norra2017]( https://github.com/tpall/norra2017/tree/master/lib).
 
 Alustuseks moodustan gpx faili nimedest ja nende nimes olevatest kuupäevadest `data_frame`-i.
 Seejärel grupeerin failinimed kuupäevade järgi listidesse ja ühendan omavahel otsapidi iga kuupäeva päevateekonnad.
@@ -133,7 +128,7 @@ tracks_gat <- tracks_merged %>%
   select(date, trip, asc, desc) %>% 
   gather(key, value, asc, desc)
 
-ggplot(tracks_gat, aes(str_wrap(paste(date, trip, sep = ", "), 30), value, fill = key)) + 
+ggplot(tracks_gat, aes(str_wrap(str_c(date, trip, sep = ", "), 30), value, fill = key)) + 
   geom_bar(stat = 'identity', position = 'dodge') +
   coord_flip() + 
   ylab("Summed value, meters") +
