@@ -33,6 +33,6 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: rsync -r -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null 217.146.69.34' --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs/
+  script: rsync -r -e 'ssh -o StrictHostKeyChecking=no 217.146.69.34' --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs/
   on:
     branch: master
