@@ -17,6 +17,7 @@ before_install:
 
 before_script:
   - "Rscript -e 'blogdown::install_hugo()'"
+  - chmod +x ./_deploy.sh
 
 script:
   - "Rscript -e 'blogdown::build_site()'"
@@ -29,7 +30,6 @@ before_deploy:
   - eval "$(ssh-agent -s)"
   - chmod 600 /tmp/deploy_rsa
   - ssh-add /tmp/deploy_rsa
-  - chmod +x ./_deploy.sh
 
 deploy:
   provider: script
