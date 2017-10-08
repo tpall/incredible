@@ -29,10 +29,11 @@ before_deploy:
   - eval "$(ssh-agent -s)"
   - chmod 600 /tmp/deploy_rsa
   - ssh-add /tmp/deploy_rsa
+  - ssh -o StrictHostKeyChecking=no -o UserKnownHostFiles=/dev/null virt64551@credibleinterval.ee
 
 deploy:
   provider: script
   skip_cleanup: true
-  script: rsync -r -e 'ssh -o StrictHostKeyChecking=no 217.146.69.34' --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs/
+  script: rsync -r -e --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs/
   on:
     branch: master
