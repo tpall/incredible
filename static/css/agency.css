@@ -187,9 +187,8 @@ fieldset[disabled] .btn-xl.active {
 }
 
 .navbar-brand>img {
-
-    height: 50px;
-    max-width: 250px;
+    height: 100px;
+    max-width: 500px;
     margin: -15px;
 }
 
