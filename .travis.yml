@@ -34,6 +34,6 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script:  yes | ./_deploy.sh
+  script:  echo yes | ./_deploy.sh
   on:
     branch: master
