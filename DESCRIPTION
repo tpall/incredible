@@ -2,5 +2,21 @@ Package: placeholder
 Type: Website
 Title: Does not matter.
 Version: 0.0.1
-Imports: blogdown
-Remotes: rstudio/blogdown
+Imports:
+  blogdown,
+  tidyverse,
+  rvest,
+  broom,
+  devtools,
+  viridis,
+  stringr,
+  boulder,
+  lubridate,
+  leaflet,
+  leaflet.extras,
+  jsonlite,
+  htmltools,
+  htmlwidgets
+Remotes: 
+  rstudio/blogdown,
+  tpall/boulder

@@ -56,9 +56,7 @@ Kasvukõvera tõusu oleks aga ilma arvutamata võimalik hinnata visuaalselt.
 Proovime siis luua selle puuduva visuaali. 
 
 ```{r, echo=FALSE, fig.align='left', fig.cap="Inimarengu indeksi 1990-2015 tabeli pea. @aruanne2017"}
-library(imager)
-tab <- load.image("inimareng-tabel1.png")
-plot(tab, axes = F)
+knitr::include_graphics("inimareng-tabel1.png")
 ```
 
 
