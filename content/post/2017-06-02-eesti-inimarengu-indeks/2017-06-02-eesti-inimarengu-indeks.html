@@ -74,7 +74,7 @@ head(inimareng) # tabeli pea</code></pre>
   facet_wrap(~Riik, ncol = 7) +
   theme(axis.text.x = element_text(angle=45, hjust = 1)) +
   ylab(&quot;Inimarengu indeks&quot;)</code></pre>
-<p><img src="/post/2017-06-02-eesti-inimarengu-indeks_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="/post/2017-06-02-eesti-inimarengu-indeks/2017-06-02-eesti-inimarengu-indeks_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>Arvutame siis kasvu ja järjestame riigid selle põhjal. Kuna puuduvad paralleeluniversumid, siis on igal riigil on iga ajaperioodi kohta ainult üks väärtus ja kasvu iseloomustamiseks piisaks lihtsalt ainult esimese ja viimase ajaperioodi vahe arvutamiseks. Meie aga arvutame lieaarse mudeli tõusu, kuigi need kõverad on kohati ilmselgelt mittelineaarsed. Me teeme muutuja <code>Aasta</code> numbriliseks <code>mutate_at(&quot;Aasta&quot;, as.numeric)</code>, muidu saaksimegi ainult vahe aastaga 1990 võrreldes. Kui me võtame aastad numbrilise muutujana, siis ei oma lõikepunkt tähendust ja me vaatame ainult mudeli tõusu. <code>broom::tidy</code> funktsioon konverteerib <code>lm</code> funktsiooni väljundi mugavalt käitletavaks andmeraamiks.</p>
 <pre class="r"><code>library(broom) # tidy funktsioon
 kasv &lt;- inimareng %&gt;% 
@@ -103,7 +103,7 @@ ia_kasv$Riik_kasv &lt;- factor(ia_kasv$Riik, levels = riik_jrk$Riik)</code></pre
   facet_wrap(~Riik_kasv, ncol = 7) +
   theme(axis.text.x = element_text(angle=45, hjust = 1)) +
   ylab(&quot;Inimarengu indeks&quot;)</code></pre>
-<p><img src="/post/2017-06-02-eesti-inimarengu-indeks_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="/post/2017-06-02-eesti-inimarengu-indeks/2017-06-02-eesti-inimarengu-indeks_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>Tegelikult annaks veel nokitseda, kuid kokkuvõtvalt oleks inimarengu indeksi visuaalne representatsioon aidanud kaasa Eesti võrdlusele teiste EU riikidega. Sõltumata riikide järjestamise põhimõttest.</p>
 <p>Selgelt on riike, mis on alustanud meie ja meie lähinaabritega samalt tasemelt, kus inimarengu indeks on teinud küll nõksu ülespoole, kuid viimasel perioodil on toimunud arengu pidurdumine, näiteks nagu Rumeenia ja Bulgaaria. Loomulikult on areng väiksem riikides, mis olid juba kõrge arengutasemega perioodi alguses, Nõukogude Liidu lagunemise ajal.</p>
 <div id="viited" class="section level1 unnumbered">
