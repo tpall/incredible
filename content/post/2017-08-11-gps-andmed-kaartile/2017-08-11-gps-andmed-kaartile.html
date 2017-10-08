@@ -186,23 +186,23 @@ tracks_merged &lt;- left_join(tracks_merged, photos_location)</code></pre>
 <p>Plotime oma ettevalmistatud andmed kasutades paketti <code>leaflet</code>. <!-- Funktsioon on adapteeritud: http://mhermans.net/hiking-gpx-r-leaflet.html. --> Kaartikihte saab lisada funktsiooniga <code>addTiles</code> või <code>addProviderTiles</code>. Saadaolevaid kaarte näitavad käsud <code>providers</code> ja <code>providers.details</code>.</p>
 <pre class="r"><code># Let&#39;s have a look at some map providers
 sample(providers, 6)</code></pre>
-<pre><code>## $OpenWeatherMap.PrecipitationClassic
-## [1] &quot;OpenWeatherMap.PrecipitationClassic&quot;
+<pre><code>## $HERE.terrainDayMobile
+## [1] &quot;HERE.terrainDayMobile&quot;
+## 
+## $HERE.pedestrianDay
+## [1] &quot;HERE.pedestrianDay&quot;
+## 
+## $Esri.OceanBasemap
+## [1] &quot;Esri.OceanBasemap&quot;
+## 
+## $NASAGIBS.ModisTerraSnowCover
+## [1] &quot;NASAGIBS.ModisTerraSnowCover&quot;
 ## 
 ## $OpenWeatherMap.Temperature
 ## [1] &quot;OpenWeatherMap.Temperature&quot;
 ## 
-## $HERE.hybridDayMobile
-## [1] &quot;HERE.hybridDayMobile&quot;
-## 
-## $OpenWeatherMap.Snow
-## [1] &quot;OpenWeatherMap.Snow&quot;
-## 
-## $Thunderforest.Transport
-## [1] &quot;Thunderforest.Transport&quot;
-## 
-## $OpenStreetMap.France
-## [1] &quot;OpenStreetMap.France&quot;</code></pre>
+## $Esri.WorldPhysical
+## [1] &quot;Esri.WorldPhysical&quot;</code></pre>
 <p><code>leaflet</code>-i kaart koostatakse kiht-kihilt. Iga päeva distantsi kanname eraldi kaartile, lisame <em>kõrgusprofiili</em>, legendi ja fotod, kui need on olemas.</p>
 <p>Kõrgusprofiili lisamiseks on <code>leaflet</code> <strong>javascript</strong> programmile olemas <a href="https://github.com/MrMufflon/Leaflet.Elevation">plugin</a> <code>L.control.elevation</code>, mis pole aga R-i jaoks implementeeritud. Lisaks vajab see plugin (<em>loomulikult!</em>) kõrgusinfot, mis paistab minevat kaduma, kui kasutada <code>leaflet.extras</code> paketi funktsiooni <code>addGPX</code> (viimane kasutab leafleti <code>omnivore</code> pluginat, mis GPX andmete puhul kõrgusinfot ei impordi). See tähendab, et tuleb kasutada üht teist <a href="https://github.com/mpetazzoni/leaflet-gpx">leaflet GPX pluginat</a>, mis impordib ka <em>altituudi</em>: <code>leaflet-gpx</code>. Aga ka see plugin pole R-i jaoks implementeeritud. Lahenduseks on need pluginad javascripti kujul leafleti R funktsiooni lisada, nagu on näidatud siin: <a href="https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92" class="uri">https://gist.github.com/jcheng5/c084a59717f18e947a17955007dc5f92</a>, kasutades <code>htmlwidgets::onRender</code> funktsiooni. Soovitav on enne kontrollida veebibrauseris kas lisatav JS ka muidu töötab.</p>
 <div id="api-keys" class="section level4">
@@ -311,11 +311,11 @@ plot_trip2 &lt;- function(json, bb, trip = NULL, popupdata = NULL){
     # Add a fullscreen control button
     addFullscreenControl()
 }</code></pre>
-<blockquote>
-<p>Iga päeva distantsi kanname eraldi kaartile, lisame legendi ja fotod, kui need on olemas.</p>
-</blockquote>
+<p><br></p>
+<p>Iga päeva distantsi kannan eraldi kaartile, lisan legendi ja fotod, kui need on olemas.</p>
+<p><br></p>
 <pre class="r"><code>tracks_merged &lt;- mutate(tracks_merged, trip_leaf = pmap(list(geojson, bb, trip, popupdata), plot_trip2))</code></pre>
-<p>Üksikuid kaarte näeb tracks data_frame-st niimoodi, tuleb valida trip_leaf list/tulp ja sealt subsettida:</p>
+<p>Üksikuid kaarte näeb tracks_merge data_frame-st niimoodi, et tuleb subsettida trip_leaf tulbast.</p>
 <pre class="r"><code>tracks_merged$trip_leaf[[1]]</code></pre>
 <p>Erinevaid aluskaarte saab valida alt paremast nurgast (legendi kohal), kursoriga aktiveeritavast menüüst.</p>
 </div>
