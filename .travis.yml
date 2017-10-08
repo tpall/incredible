@@ -33,6 +33,6 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: yes | rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs/
+  script: echo yes | rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs/
   on:
     branch: master
