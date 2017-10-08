@@ -11,6 +11,10 @@ cache:
   directories:
     - $HOME/bin
 
+before_install:
+  - sudo apt-get update -q
+  - sudo apt-get install libimage-exiftool-perl -y
+
 before_script:
   - "Rscript -e 'blogdown::install_hugo()'"
 
@@ -29,6 +33,6 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs/
+  script: rsync -r --delete-after -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs/
   on:
     branch: master
