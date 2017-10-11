@@ -7,6 +7,8 @@
 # 
 # git config --global user.email "tapa741@gmail.com"
 # git config --global user.name "Taavi Päll"
+echo "Starting ssh"
+ssh virt64551@credibleinterval.ee
 
 echo "Starting rsync"
 rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs
