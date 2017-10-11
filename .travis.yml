@@ -17,7 +17,7 @@ before_install:
 
 before_script:
   - "Rscript -e 'blogdown::install_hugo()'"
-  - chmod +x ./_deploy.sh
+  - chmod +x deploy.sh
 
 script:
   - "Rscript -e 'blogdown::build_site()'"
@@ -34,7 +34,6 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: 
-    - ./_deploy.sh
+  script: deploy.sh
   on:
     branch: master
