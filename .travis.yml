@@ -18,6 +18,7 @@ before_install:
 before_script:
   - "Rscript -e 'blogdown::install_hugo()'"
   - chmod +x ./deploy.sh
+  - echo -e "Host *\n\tStrictHostKeyChecking no\nUserKnownHostsFile /dev/null\nLogLevel ERROR\n" >> ~/.ssh/config
 
 script:
   - "Rscript -e 'blogdown::build_site()'"
