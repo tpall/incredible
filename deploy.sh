@@ -9,6 +9,6 @@
 # git config --global user.name "Taavi Päll"
 
 echo "Starting rsync"
-rsync -e "ssh -o StrictHostKeyChecking=no" -r --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs
+rsync -e "ssh -o StrictHostKeyChecking=no" -r --timeout=600 --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs
 
 exit 0
