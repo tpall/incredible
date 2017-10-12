@@ -7,11 +7,11 @@ echo "ls ssh"
 ls -l ~/.ssh
 
 echo "run ssh host"
-ssh virt64551@credibleinterval.ee
+ssh $DEPLOY_USER@$DEPLOY_HOST
 
 echo "whoami"
 whoami
 
 echo "Starting rsync"
 
-rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs
+rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
