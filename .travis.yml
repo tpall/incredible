@@ -1,6 +1,8 @@
 language: r
 dist: trusty
 sudo: false
+notifications:
+  email: false
 branches:
   only: master
 addons:
@@ -10,8 +12,6 @@ cache:
   directories:
   - $HOME/bin
 before_install:
-- openssl aes-256-cbc -K $encrypted_288f77d8e810_key -iv $encrypted_288f77d8e810_iv
-  -in deploy_rsa.enc -out /tmp/deploy_rsa -d && chmod 600 /tmp/deploy_rsa
 - sudo apt-get update -q
 - sudo apt-get install libimage-exiftool-perl -y
 before_script:
@@ -19,6 +19,9 @@ before_script:
 script:
 - Rscript -e 'blogdown::build_site()'
 before_deploy:
+- openssl aes-256-cbc -K $encrypted_288f77d8e810_key -iv $encrypted_288f77d8e810_iv
+  -in deploy_rsa.enc -out /tmp/deploy_rsa -d
+- chmod 600 /tmp/deploy_rsa
 - eval "$(ssh-agent -s)"
 - ssh-add /tmp/deploy_rsa
 - chmod +x ./deploy.sh
