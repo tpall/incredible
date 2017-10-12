@@ -1,6 +1,16 @@
 #!/bin/sh
 
-ls -l "~/.ssh"
+echo "whoami"
+whoami
+
+echo "ls ssh"
+ls -l ~/.ssh
+
+echo "run ssh host"
+ssh virt64551@credibleinterval.ee
+
+echo "whoami"
+whoami
 
 echo "Starting rsync"
 
