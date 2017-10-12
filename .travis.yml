@@ -2,8 +2,9 @@ language: r
 dist: trusty
 sudo: false
 branches:
-  only:
-  - master
+  only: master
+addons:
+  ssh_known_hosts: credibleinterval.ee
 cache:
   packages: true
   directories:
@@ -16,8 +17,6 @@ before_script:
 - chmod +x ./deploy.sh
 script:
 - Rscript -e 'blogdown::build_site()'
-addons:
-  ssh_known_hosts: credibleinterval.ee
 before_deploy:
 - openssl aes-256-cbc -K $encrypted_288f77d8e810_key -iv $encrypted_288f77d8e810_iv
   -in deploy_rsa.enc -out /tmp/deploy_rsa -d
