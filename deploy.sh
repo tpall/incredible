@@ -6,12 +6,9 @@ whoami
 echo "ls ssh"
 ls -l ~/.ssh
 
-echo "run ssh host"
-ssh -i ~/.ssh/deploy_rsa
+echo "run ssh host test"
+ssh -i /tmp/deploy_rsa
 ssh $DEPLOY_USER@$DEPLOY_HOST
-
-echo "whoami"
-whoami
 
 echo "Starting rsync"
 
