@@ -6,7 +6,7 @@ notifications:
 branches:
   only: master
 addons:
-  ssh_known_hosts: credibleinterval.ee
+  ssh_known_hosts: $DEPLOY_HOST
 cache:
   packages: true
   directories:
@@ -24,11 +24,10 @@ before_deploy:
 - eval "$(ssh-agent -s)"
 - chmod 600 /tmp/deploy_rsa
 - ssh-add /tmp/deploy_rsa
-- chmod +x ./deploy.sh
 deploy:
   provider: script
   skip_cleanup: true
-  script: ./deploy.sh
+  script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
   on:
     branch: master
 env:
