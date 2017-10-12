@@ -14,7 +14,6 @@ before_install:
 - sudo apt-get install libimage-exiftool-perl -y
 before_script:
 - Rscript -e 'blogdown::install_hugo()'
-- chmod +x ./deploy.sh
 script:
 - Rscript -e 'blogdown::build_site()'
 before_deploy:
@@ -26,6 +25,6 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: ./deploy.sh
+  script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs
   on:
     branch: master
