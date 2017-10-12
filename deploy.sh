@@ -4,7 +4,7 @@ echo "whoami"
 whoami
 
 echo "ssh"
-ssh -vvv $DEPLOY_USER@$DEPLOY_HOST
+ssh -vv $DEPLOY_USER@$DEPLOY_HOST
 
 echo "Starting rsync"
 
