@@ -1,10 +1,7 @@
 #!/bin/sh
 
-echo "whoami"
-whoami
-
-echo "ssh"
-ssh -vv $DEPLOY_USER@$DEPLOY_HOST
+echo "test ssh"
+ssh -vT $DEPLOY_USER@$DEPLOY_HOST
 
 echo "Starting rsync"
 
