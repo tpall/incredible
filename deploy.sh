@@ -3,9 +3,8 @@
 echo "whoami"
 whoami
 
-echo "ls ssh"
-ls -l ~/.ssh
-ls -l /tmp/
+echo "ssh"
+ssh -vvv $DEPLOY_USER@$DEPLOY_HOST
 
 echo "Starting rsync"
 
