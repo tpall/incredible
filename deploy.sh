@@ -7,11 +7,8 @@ echo "ls ssh"
 ls -l ~/.ssh
 
 echo "run ssh host"
-ssh -i deploy_rsa
+ssh -i ~/.ssh/authorized_keys
 ssh $DEPLOY_USER@$DEPLOY_HOST
-
-echo "whoami"
-whoami
 
 echo "Starting rsync"
 
