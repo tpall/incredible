@@ -27,6 +27,6 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public/ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+  script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public/ virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs
   on:
     branch: master
