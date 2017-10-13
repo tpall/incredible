@@ -6,7 +6,7 @@ notifications:
 branches:
   only: master
 addons:
-  ssh_known_hosts: $DEPLOY_HOST
+  ssh_known_hosts: credibleinterval.ee
 cache:
   packages: true
   directories:
