@@ -24,9 +24,13 @@ before_deploy:
 - eval "$(ssh-agent -s)"
 - chmod 600 /tmp/deploy_rsa
 - ssh-add /tmp/deploy_rsa
+- echo $DEPLOY_HOST
 deploy:
   provider: script
   skip_cleanup: true
   script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/public/ virt64551@credibleinterval.ee:~/domeenid/www.credibleinterval.ee/htdocs
   on:
     branch: master
+env:
+  global:
+    secure: mKpT70J4lXYq1880PsGBq3k1BqV2l8x1MIaY7+GTKNHcjVl21dr7xXMP/tIwCvufN4RTsOrH1Z+ZVhBgwlYP4dHB0znfWYFdjWh//8tIZQ+d3+ReVUOrsBFB1QBL0xaPxiEatYeT0CERuKEvTjTm7qblxVBPb0LB0P/UG2VLKBcr0QtG+DxjHSMWWD/ulz0S8BqAjgR1zIshlKNTE3V+FzDGOKt5vQxZ8hIiqpghxIjRaDVVXY0HlVfygdcmeTsT11Kog9SadD8M2aZMK6lOc1irqibXVgXLya6FlaC30INHUw+SIU332yFdhZ2kzfjJX/HefCBLGo/velYQx0mF4zXRj9GyP7/qVQMZKiBnrqIFXaljD/Xxe8cNfKY+pZAHoVHuG3Id9x7d0FOhf+zrsrw2H5TfWbMELoXI4fkwUhuE8q1ZGMkAM9kG6QuaaNMK0c3HSqkp3eYAE6LUAz85TN/3+yxoul7wZVoiifd4NL7ulg4Bg1Uez6naZwKluxexit56jm56J5iAce1ochjC/IqtNjT6KyjseNSLy2jAjz5eFt6e2pnTms/53D0QD7ZIZOs9fdeYVt4EFbs/6yWYWdcRqw2zrG7R0x4wjxJPxTkUk6VhSxokLhnIzzO1InOEnMcY/fWstYX4YqFNJ975zrMTbU/cxJ1FLETYH7ubyQM=
