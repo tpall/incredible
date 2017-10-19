@@ -42,7 +42,7 @@ references:
 
 
 
-<p>Esimesel juunil 2017 avaldatud Eesti inimarengu aruandes <a href="http://inimareng.ee/pohisonumid-eesti-randeajastul/">Eesti rändeajastul</a> tuuakse välja, et Eesti inimarengu indeks on aastatel 1990–2015 teinud läbi märkimisväärse tõusu. Uutest Euroopa Liiduga (EU) liitujatest on Eesti oma indeksi kasvuga saavutanud auväärse kolmanda koha Sloveenias ja Tšehhi Vabariigi järel.</p>
+<p><strong>Esimesel juunil 2017 avaldatud Eesti inimarengu aruandes <a href="http://inimareng.ee/pohisonumid-eesti-randeajastul/">Eesti rändeajastul</a> tuuakse välja, et Eesti inimarengu indeks on aastatel 1990–2015 teinud läbi märkimisväärse tõusu</strong>. Uutest Euroopa Liiduga (EU) liitujatest on Eesti oma indeksi kasvuga saavutanud auväärse kolmanda koha Sloveenia ja Tšehhi Vabariigi järel.</p>
 <p>Kahjuks on selle väite toetuseks toodud andmed esitatud ainult tabeli kujul. Eesti edu visuaalseks toetuseks oleks pidanud esitama võrreldavate riikide inimarengu indeksi kasvukõverad. Puhtalt tabelit vaadates ei ole võimalik seda väidet lihtsal viisil kontrollida. Põhimõtteliselt on võimalik võrrelda riikide numberid aastate kaupa tulbas, kuid kasvu võrdlemine nõuab juba arvutamist. Kasvukõvera tõusu oleks aga ilma arvutamata võimalik hinnata visuaalselt. Proovime siis luua selle puuduva visuaali.</p>
 <div class="figure" style="text-align: left"><span id="fig:unnamed-chunk-1"></span>
 <img src="inimareng-tabel1.png" alt="Inimarengu indeksi 1990-2015 tabeli pea. @aruanne2017" width="635" />
@@ -67,7 +67,8 @@ head(inimareng) # tabeli pea</code></pre>
 ## 4         Iirimaa  1990  0.770
 ## 5          Rootsi  1990  0.815
 ## 6 Ühendkuningriik  1990  0.773</code></pre>
-<p>Esimene versioon inimarengu indeksi kasvukõveratest ongi valmis. Riigid on järjestatud tähestikulises järjekorras. Kas Eesti kasv torkab silma?</p>
+<p>Esimene versioon inimarengu indeksi kasvukõveratest ongi valmis. Riigid on järjestatud tähestikulises järjekorras.</p>
+<p><strong>Kas Eesti kasv torkab silma?</strong></p>
 <pre class="r"><code>ggplot(inimareng, aes(Aasta, indeks, group=1)) +
   geom_line() +
   facet_wrap(~Riik, ncol = 7) +
