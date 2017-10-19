@@ -256,6 +256,14 @@ plot_trip2 <- function(json, bb, trip = NULL, popupdata = NULL){
   # Thunderforest base url
   thunderforest_link_template <- "https://{s}.tile.thunderforest.com/%s/{z}/{x}/{y}.png?apikey=%s"
   
+  thunderforest_api_key <- function() {
+    val <- Sys.getenv("THUNDERF_APIKEY")
+    if (identical(val, "")) {
+      warning("`THUNDERF_APIKEY` env var has not been set")
+    }
+    val
+  }
+  
   # Compose map
   m <- leaflet() %>%
     
@@ -266,9 +274,9 @@ plot_trip2 <- function(json, bb, trip = NULL, popupdata = NULL){
               lat2 = bb[[4]]) %>%
     
     # Add tiles
-    addTiles(sprintf(thunderforest_link_template, "landscape", Sys.getenv("THUNDERF_APIKEY")), group = "Topograafiline") %>%
-    addTiles(sprintf(thunderforest_link_template, "cycle", Sys.getenv("THUNDERF_APIKEY")), group = "Rattateed") %>%
-    addTiles(sprintf(thunderforest_link_template, "outdoors", Sys.getenv("THUNDERF_APIKEY")), group = "Matka- ja terviserajad") %>%
+    addTiles(sprintf(thunderforest_link_template, "landscape", thunderforest_api_key()), group = "Topograafiline") %>%
+    addTiles(sprintf(thunderforest_link_template, "cycle", thunderforest_api_key()), group = "Rattateed") %>%
+    addTiles(sprintf(thunderforest_link_template, "outdoors", thunderforest_api_key()), group = "Matka- ja terviserajad") %>%
     addProviderTiles("OpenStreetMap.Mapnik", group = "Sõiduteed", options = providerTileOptions(detectRetina = T)) %>%
     addProviderTiles("Esri.WorldImagery", group = "Satelliit", options = providerTileOptions(detectRetina = T))
   
