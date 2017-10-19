@@ -46,7 +46,7 @@ knitr::opts_chunk$set(message = F)
 
 
 **Esimesel juunil 2017 avaldatud Eesti inimarengu aruandes [Eesti rändeajastul](http://inimareng.ee/pohisonumid-eesti-randeajastul/) tuuakse välja, et Eesti inimarengu indeks on aastatel 1990–2015 teinud läbi märkimisväärse tõusu**. 
-Uutest Euroopa Liiduga (EU) liitujatest on Eesti oma indeksi kasvuga saavutanud auväärse kolmanda koha Sloveenias ja Tšehhi Vabariigi järel.
+Uutest Euroopa Liiduga (EU) liitujatest on Eesti oma indeksi kasvuga saavutanud auväärse kolmanda koha Sloveenia ja Tšehhi Vabariigi järel.
 
 Kahjuks on selle väite toetuseks toodud andmed esitatud ainult tabeli kujul.
 Eesti edu visuaalseks toetuseks oleks pidanud esitama võrreldavate riikide inimarengu indeksi kasvukõverad.
