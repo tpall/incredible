@@ -54,7 +54,7 @@ googleAnalytics = "UA-100332037-1"
   [params.navigation]
     brand = "Credibleinterval"
     # Optional logo as brand stored in img/
-    # logo = "logo_2.svg"
+    logo = "logo_2.svg"
     services = "Teenused"
     portfolio = "Portfolio"
     about = "Info"
