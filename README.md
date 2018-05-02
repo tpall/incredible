@@ -2,4 +2,4 @@
 
 # That's incredible
 
-This is credibleinterval.ee webpage repo.
+This is credibleinterval.ee webpage repo. No idea what's going on...
