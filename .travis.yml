@@ -1,5 +1,5 @@
 language: r
-dist: trusty
+dist: xenial
 sudo: false
 notifications:
   email: false
@@ -25,7 +25,6 @@ before_deploy:
 - eval "$(ssh-agent -s)"
 - chmod 600 /tmp/deploy_rsa
 - ssh-add /tmp/deploy_rsa
-- ls -ltr
 - ls -ltr $TRAVIS_BUILD_DIR/
 deploy:
   provider: script
