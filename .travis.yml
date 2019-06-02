@@ -15,7 +15,7 @@ before_install:
 - sudo apt-get update -q
 - sudo apt-get install libimage-exiftool-perl -y
 before_script:
-- Rscript -e 'blogdown::install_hugo(version = "0.20.7")'
+- Rscript -e 'blogdown::install_hugo(version = "0.20.7", force = TRUE)'
 script:
 - echo THUNDERF_APIKEY=$THUNDERF_APIKEY > ~/.Renviron
 - Rscript -e 'blogdown::build_site()'
