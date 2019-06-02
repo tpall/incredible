@@ -80,7 +80,7 @@ googleAnalytics = "UA-100332037-1"
       name = "Blogi"
       weight = 10
       identifier = "post"
-      url = "/post/"
+      url = "/post"
      
   # Hero section
   [params.hero]
