@@ -25,7 +25,6 @@ before_deploy:
 - eval "$(ssh-agent -s)"
 - chmod 600 /tmp/deploy_rsa
 - ssh-add /tmp/deploy_rsa
-- ls -ltr $TRAVIS_BUILD_DIR/
 deploy:
   provider: script
   skip_cleanup: true
