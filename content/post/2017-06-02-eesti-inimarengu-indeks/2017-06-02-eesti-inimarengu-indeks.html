@@ -42,15 +42,23 @@ references:
 
 
 
-<p><strong>Esimesel juunil 2017 avaldatud Eesti inimarengu aruandes <a href="http://inimareng.ee/pohisonumid-eesti-randeajastul/">Eesti rändeajastul</a> tuuakse välja, et Eesti inimarengu indeks on aastatel 1990–2015 teinud läbi märkimisväärse tõusu</strong>. Uutest Euroopa Liiduga (EU) liitujatest on Eesti oma indeksi kasvuga saavutanud auväärse kolmanda koha Sloveenia ja Tšehhi Vabariigi järel.</p>
-<p>Kahjuks on selle väite toetuseks toodud andmed esitatud ainult tabeli kujul. Eesti edu visuaalseks toetuseks oleks pidanud esitama võrreldavate riikide inimarengu indeksi kasvukõverad. Puhtalt tabelit vaadates ei ole võimalik seda väidet lihtsal viisil kontrollida. Põhimõtteliselt on võimalik võrrelda riikide numberid aastate kaupa tulbas, kuid kasvu võrdlemine nõuab juba arvutamist. Kasvukõvera tõusu oleks aga ilma arvutamata võimalik hinnata visuaalselt. Proovime siis luua selle puuduva visuaali.</p>
+<p><strong>Esimesel juunil 2017 avaldatud Eesti inimarengu aruandes <a href="http://inimareng.ee/pohisonumid-eesti-randeajastul/">Eesti rändeajastul</a> tuuakse välja, et Eesti inimarengu indeks on aastatel 1990–2015 teinud läbi märkimisväärse tõusu</strong>.
+Uutest Euroopa Liiduga (EU) liitujatest on Eesti oma indeksi kasvuga saavutanud auväärse kolmanda koha Sloveenia ja Tšehhi Vabariigi järel.</p>
+<p>Kahjuks on selle väite toetuseks toodud andmed esitatud ainult tabeli kujul.
+Eesti edu visuaalseks toetuseks oleks pidanud esitama võrreldavate riikide inimarengu indeksi kasvukõverad.
+Puhtalt tabelit vaadates ei ole võimalik seda väidet lihtsal viisil kontrollida.
+Põhimõtteliselt on võimalik võrrelda riikide numberid aastate kaupa tulbas, kuid kasvu võrdlemine nõuab juba arvutamist.
+Kasvukõvera tõusu oleks aga ilma arvutamata võimalik hinnata visuaalselt.
+Proovime siis luua selle puuduva visuaali.</p>
 <div class="figure" style="text-align: left"><span id="fig:unnamed-chunk-1"></span>
 <img src="inimareng-tabel1.png" alt="Inimarengu indeksi 1990-2015 tabeli pea. @aruanne2017" width="635" />
 <p class="caption">
 Figure 1: Inimarengu indeksi 1990-2015 tabeli pea. <span class="citation">Tammaru et al. (2017)</span>
 </p>
 </div>
-<p>Kõigepealt laeme raporti koduleheküljelt alla jutuks oleva tabeli andmetega. Paradoksaalsel kombel on nende andmete esitamine tabeli kujul hea just kättesaadavuse seisukohalt. Andmete kaevamiseks kasutame <code>R</code> programmi paketi <code>rvest</code> funktsioone</p>
+<p>Kõigepealt laeme raporti koduleheküljelt alla jutuks oleva tabeli andmetega.
+Paradoksaalsel kombel on nende andmete esitamine tabeli kujul hea just kättesaadavuse seisukohalt.
+Andmete kaevamiseks kasutame <code>R</code> programmi paketi <code>rvest</code> funktsioone</p>
 <pre class="r"><code>library(tidyverse)
 library(rvest)
 
@@ -84,13 +92,15 @@ kasv &lt;- inimareng %&gt;%
   filter(term==&quot;Aasta&quot;) %&gt;% # vaatame ainult tõusu
   arrange(estimate)
 head(kasv)</code></pre>
-<pre><code>##        Riik  term    estimate    std.error statistic     p.value
-## 1    Belgia Aasta 0.003176271 0.0010274486  3.091416 0.090636205
-## 2    Rootsi Aasta 0.003430508 0.0013501572  2.540822 0.126229302
-## 3   Holland Aasta 0.003705085 0.0003307474 11.202158 0.007874861
-## 4   Austria Aasta 0.003789831 0.0003545575 10.688903 0.008639273
-## 5 Bulgaaria Aasta 0.003793220 0.0006367109  5.957524 0.027037813
-## 6     Soome Aasta 0.003908475 0.0010268669  3.806213 0.062613088</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   Riik      term  estimate std.error statistic p.value
+##   &lt;chr&gt;     &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+## 1 Belgia    Aasta  0.00318  0.00103       3.09 0.0906 
+## 2 Rootsi    Aasta  0.00343  0.00135       2.54 0.126  
+## 3 Holland   Aasta  0.00371  0.000331     11.2  0.00787
+## 4 Austria   Aasta  0.00379  0.000355     10.7  0.00864
+## 5 Bulgaaria Aasta  0.00379  0.000637      5.96 0.0270 
+## 6 Soome     Aasta  0.00391  0.00103       3.81 0.0626</code></pre>
 <p>Järjestame riigid mudeli tõusu järgi.</p>
 <pre class="r"><code>ia_kasv &lt;- left_join(inimareng, kasv, &quot;Riik&quot;)
 riik_jrk &lt;- select(ia_kasv, Riik, estimate) %&gt;% 
@@ -110,7 +120,7 @@ ia_kasv$Riik_kasv &lt;- factor(ia_kasv$Riik, levels = riik_jrk$Riik)</code></pre
 <h1>Viited</h1>
 <div id="refs" class="references">
 <div id="ref-aruanne2017">
-<p>Tammaru, Tiit, Kallas Kristina, Eamets Raul, Abuladze Liili, Ahas Rein, Annist Aet, Asari Eva-Maria, et al. 2017. “Eesti Inimarengu Aruanne 2016/2017 ‘Eesti Rändeajastul’.” <a href="http://inimareng.ee" class="uri">http://inimareng.ee</a>.</p>
+<p>Tammaru, Tiit, Kallas Kristina, Eamets Raul, Abuladze Liili, Ahas Rein, Annist Aet, Asari Eva-Maria, et al. 2017. “Eesti Inimarengu Aruanne 2016/2017 ‘Eesti Rändeajastul’.” <a href="http://inimareng.ee">http://inimareng.ee</a>.</p>
 </div>
 </div>
 </div>

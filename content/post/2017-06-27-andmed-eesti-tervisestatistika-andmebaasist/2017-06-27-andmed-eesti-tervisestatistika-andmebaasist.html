@@ -12,7 +12,8 @@ tags: [andmetöötlus,json]
 
 <div id="probleem" class="section level2">
 <h2>Probleem</h2>
-<p><a href="http://www.tai.ee/et/">Tervise Arengu Instituudi</a> (TAI) <a href="http://pxweb.tai.ee/PXWeb2015/index.html">Eesti tervisestatistika ja terviseuuringute andmebaas</a> on veebis avalikult saadaval, kuid andmebaasimootor genereerib valitud andmetest täiesti haiged ja halvasti formaaditud tabelid (Fig. <a href="#fig:nh01">1</a>). Nende tabelite kasutatavaks muutmine on tüütu ja aeganõudev.</p>
+<p><a href="http://www.tai.ee/et/">Tervise Arengu Instituudi</a> (TAI) <a href="http://pxweb.tai.ee/PXWeb2015/index.html">Eesti tervisestatistika ja terviseuuringute andmebaas</a> on veebis avalikult saadaval, kuid andmebaasimootor genereerib valitud andmetest täiesti haiged ja halvasti formaaditud tabelid (Fig. <a href="#fig:nh01">1</a>).
+Nende tabelite kasutatavaks muutmine on tüütu ja aeganõudev.</p>
 <div class="figure" style="text-align: left"><span id="fig:nh01"></span>
 <img src="20161018_172938_nh01.png" alt="__Tüüpiline TAI andmebaasi tabel__. Aastate tulp on auklik, inimsilmale vaatamiseks sobib, kuid programmaatiliseks lähenemiseks tuleb tühjad read täita. Seda tabelit on võimatu sorteerida ilma, et andmed sassi läheks. Samamoodi oleks võinud ju ka 'Mehed ja naised'-tulba puhul piirduda ainult ühe kirjega tulba ülemisel real. Lisaks puuduvad tulbanimed ja tabeli peas on kaks rida. Täielik mäsu." width="636" />
 <p class="caption">
@@ -23,7 +24,11 @@ Figure 1: <strong>Tüüpiline TAI andmebaasi tabel</strong>. Aastate tulp on auk
 </div>
 <div id="lahendus" class="section level2">
 <h2>Lahendus</h2>
-<p>Õnneks on hakanud TAI pakkuma ka andmete allalaadimist JSON formaadis. Nende JSONist saab kerge vaevaga andmed tabelisse. Boonusena lisandub ka näputäis metaandmeid, nagu andmete lühikirjeldus/pealkiri (<em>label</em>), päritolu ja viimase uuenduse ajatempel. Kirjutasin selleks pisikese funktsiooni ja R paketi nimega boulder: <a href="https://github.com/tpall/boulder" class="uri">https://github.com/tpall/boulder</a> (Fig. <a href="#fig:githuboulder">2</a>). Nimi on võetud Brand Estonia tööriistakastist, 1) pole mingi rutiinne ‘esthealtstats-import-export’, 2) sisaldab lõpus R-i ja 3) olen selle maksumaksjana juba kinni maksnud.</p>
+<p>Õnneks on hakanud TAI pakkuma ka andmete allalaadimist JSON formaadis.
+Nende JSONist saab kerge vaevaga andmed tabelisse.
+Boonusena lisandub ka näputäis metaandmeid, nagu andmete lühikirjeldus/pealkiri (<em>label</em>), päritolu ja viimase uuenduse ajatempel.
+Kirjutasin selleks pisikese funktsiooni ja R paketi nimega boulder: <a href="https://github.com/tpall/boulder" class="uri">https://github.com/tpall/boulder</a> (Fig. <a href="#fig:githuboulder">2</a>).
+Nimi on võetud Brand Estonia tööriistakastist, 1) pole mingi rutiinne ‘esthealtstats-import-export’, 2) sisaldab lõpus R-i ja 3) olen selle maksumaksjana juba kinni maksnud.</p>
 <p><br/></p>
 <blockquote>
 <p>bouldeR: In our nature, the giant erratic boulders appear unexpectedly in the forest or on the beach. In our visual communication, they play a similar disruptive role. The use of boulders is not compulsory. <a href="https://brand.estonia.ee/design/boulders/">Brand Estonia</a></p>
@@ -45,7 +50,8 @@ Figure 2: <strong>boulder paketi leht githubis</strong>.
 </div>
 <div id="naide" class="section level2">
 <h2>Näide</h2>
-<p>JSON faili <code>data.frame</code> formaati importimise funktsiooni kasutamiseks tuleb installeerida <code>boulder</code> pakett. See pakett sisaldab praegusel hetkel ainult ühte funktsiooni: <code>json_to_df</code>, mis võtab sisse alla laaditud imporditava faili nime ja väljastab R-i keskkonda objekti tabeliga.</p>
+<p>JSON faili <code>data.frame</code> formaati importimise funktsiooni kasutamiseks tuleb installeerida <code>boulder</code> pakett.
+See pakett sisaldab praegusel hetkel ainult ühte funktsiooni: <code>json_to_df</code>, mis võtab sisse alla laaditud imporditava faili nime ja väljastab R-i keskkonda objekti tabeliga.</p>
 <pre class="r"><code># Installeerime paketi github-ist
 devtools::install_github(&quot;tpall/boulder&quot;)</code></pre>
 <p><br/></p>
@@ -61,16 +67,16 @@ pk10 &lt;- json_to_df(path_to_PK10.json)
 # Vaatame imporditud andmeid
 head(pk10)</code></pre>
 <pre><code>## # A tibble: 6 x 7
-##     Year                  `Specified site`           Sex `All age groups`
-##   &lt;fctr&gt;                            &lt;fctr&gt;        &lt;fctr&gt;            &lt;int&gt;
-## 1   2000 All malignant neoplasms (C00-C97) Men and women             6032
-## 2   2001 All malignant neoplasms (C00-C97) Men and women             6237
-## 3   2002 All malignant neoplasms (C00-C97) Men and women             6119
-## 4   2003 All malignant neoplasms (C00-C97) Men and women             6378
-## 5   2004 All malignant neoplasms (C00-C97) Men and women             6813
-## 6   2005 All malignant neoplasms (C00-C97) Men and women             6525
-## # ... with 3 more variables: label &lt;chr&gt;, source &lt;chr&gt;, updated &lt;chr&gt;</code></pre>
+##   Year  `Specified site`   Sex    `All age groups` label   source  updated 
+##   &lt;fct&gt; &lt;fct&gt;              &lt;fct&gt;             &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;   
+## 1 2000  All malignant neo… Men a…             6032 New ca… Estoni… 2015-06…
+## 2 2001  All malignant neo… Men a…             6237 New ca… Estoni… 2015-06…
+## 3 2002  All malignant neo… Men a…             6119 New ca… Estoni… 2015-06…
+## 4 2003  All malignant neo… Men a…             6378 New ca… Estoni… 2015-06…
+## 5 2004  All malignant neo… Men a…             6813 New ca… Estoni… 2015-06…
+## 6 2005  All malignant neo… Men a…             6525 New ca… Estoni… 2015-06…</code></pre>
 <p><br/></p>
-<p>Eks näe, kui pikk eluiga sellel funktsioonil on ja muidugi Statistikaameti andmebaas… Seniks, ilusat avastamist!</p>
+<p>Eks näe, kui pikk eluiga sellel funktsioonil on ja muidugi Statistikaameti andmebaas…
+Seniks, ilusat avastamist!</p>
 <p><br/><br/></p>
 </div>
