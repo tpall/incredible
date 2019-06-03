@@ -1,0 +1,53 @@
+---
+title: Kuidas importida exceli andmeid
+author: Taavi Päll
+date: '2019-06-03'
+slug: kuidas-importida-exceli-andmeid
+categories:
+  - andmetöötlus
+tags:
+  - andmetöötlus
+  - raportid
+---
+
+Mul on andmed Exceli tabelis, kuidas ma need sealt R keskkonda saan? 
+
+Iseenesest on asi väga lihtne. **tidyverse** R raamatukogude alla kuulub ka Excelist andmete importimise raamatukogu, mille nimi on **readxl**.
+
+**readxl** on lihtne pakett, selles on kaks põhilist funktsiooni ja mõned abifunktsioonid.
+
+1. `excel_sheets` Exceli failis olevate tabelite teada saamiseks
+2. `read_excel`, `read_xls` ja `read_xlsx` tabelite importimiseks. Neist kolmest funktsioonist esimene üritab ise ära arvata mis formaadis Exceli fail on ja vaikimisi impordib kõige esimese tabeli ("Sheet1"). Teised kaks eeldavad vaikimisi .xls või .xlsx formaati ja on selle võrra efektiivsemad, sest ei pea kulutama aega "mõistatamise" peale.
+3. Abifunktsioonid on tabelist imporditavate piirkondade ja tulbanimede-tüüpide spetsifitseerimiseks ja enamasti oskab `read_excel` neid ise vastavalt vajadusele kasutada. 
+
+Elu on siiski kaugel ideaalsest ja 100% masinloetavaid Exceli faile ei suuda genereerida isegi "masinad" (tarkvara). 
+
+Ideaalis peaksid tabelid algama Exceli *workbookides* ülevalt vasakult esimeset reast, sisaldama süntaktilisi tulbanimesid (näiteks ilma tühikuteta), olema "kandilised" ja mitte sisaldama tühje ruute (puuduvad andmed on tähistatud näiteks `NA`-ga).
+
+Ülaltoodu kehtib üldiselt kõigi tabelite kohta.
+
+## Install
+
+Hakkame pihta, kõigepealt installeerime **readxl** raamatukogu. R konsoolis näeb see välja niimoodi:
+```{r, message=FALSE}
+install.packages("readxl", repos = "https://ftp.eenet.ee/pub/cran/")
+```
+
+See `repos =` argument on optsionaalne, kuid antud juhul laadime me selle paketi alla EENet-ist.
+
+## Import
+
+Kui raamatukogu on edukalt installeeritud või täiesti juhuslikult juba varasemast olemas, laadime oma töökeskkonda **readxl** raamatukogu, et selles olevad funktsioonid meile R keskonnas kättesaadavaks muutuksid. 
+
+```{r}
+library(readxl)
+```
+
+Edasi peame välja selgitama kus asuvad andmed. Käesolev blogi eeldab, et 
+
+- kasutaja on loonud oma projekti jaoks eraldi kataloogi ning 
+- projekti kataloogi sisse veel kataloogi `data/` kuhu on tõstnud oma imporditava tabeli.
+
+Projekti nimedeks sobib hästi üks-kaks sõna, mis on eraldatud sidekriipsuga, näiteks "kursusetöö-2019"
+
+
