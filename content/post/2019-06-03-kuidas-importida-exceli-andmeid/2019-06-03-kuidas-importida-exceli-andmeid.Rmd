@@ -17,12 +17,12 @@ Iseenesest on asi väga lihtne. **tidyverse** R raamatukogude alla kuulub ka Exc
 **readxl** on lihtne pakett, selles on kaks põhilist funktsiooni ja mõned abifunktsioonid.
 
 1. `excel_sheets` Exceli failis olevate tabelite teada saamiseks
-2. `read_excel`, `read_xls` ja `read_xlsx` tabelite importimiseks. Neist kolmest funktsioonist esimene üritab ise ära arvata mis formaadis Exceli fail on ja vaikimisi impordib kõige esimese tabeli ("Sheet1"). Teised kaks eeldavad vaikimisi .xls või .xlsx formaati ja on selle võrra efektiivsemad, sest ei pea kulutama aega "mõistatamise" peale.
+2. `read_excel`, `read_xls` ja `read_xlsx` tabelite importimiseks. Neid võib vaadata ühe funktsioonina. Neist kolmest funktsioonist esimene üritab ise ära arvata mis formaadis Exceli fail on ja vaikimisi impordib kõige esimese tabeli ("Sheet1"). Teised kaks eeldavad vaikimisi .xls või .xlsx formaati ja on selle võrra efektiivsemad, sest ei pea kulutama aega "mõistatamise" peale.
 3. Abifunktsioonid on tabelist imporditavate piirkondade ja tulbanimede-tüüpide spetsifitseerimiseks ja enamasti oskab `read_excel` neid ise vastavalt vajadusele kasutada. 
 
 Elu on siiski kaugel ideaalsest ja 100% masinloetavaid Exceli faile ei suuda genereerida isegi "masinad" (tarkvara). 
 
-- Ideaalis peaksid tabelid algama Exceli *workbookides* ülevalt vasakult esimeset reast, 
+- Ideaalis peaksid tabelid algama Exceli *Workbookides* ülevalt vasakult esimeset reast, 
 - sisaldama süntaktilisi tulbanimesid (näiteks ilma tühikuteta), 
 - mitte kasutama kahekordseid tulbanimesid (väga paha!),
 - mitte kasutama ruutude värvimist kategooriate tähistusena, 
@@ -33,6 +33,7 @@ Elu on siiski kaugel ideaalsest ja 100% masinloetavaid Exceli faile ei suuda gen
 ## Install
 
 Hakkame pihta, kõigepealt installeerime **readxl** raamatukogu. R konsoolis näeb see välja niimoodi:
+
 ```{r, eval=FALSE, message=FALSE}
 install.packages("readxl", repos = "https://ftp.eenet.ee/pub/cran/")
 ```
@@ -41,7 +42,7 @@ See `repos =` argument on optsionaalne, kuid antud juhul laadime me selle paketi
 
 ## Import
 
-Kui raamatukogu on edukalt installeeritud või täiesti juhuslikult juba varasemast olemas, laadime oma töökeskkonda **readxl** raamatukogu, et selles olevad funktsioonid meile R keskonnas kättesaadavaks muutuksid. 
+Kui raamatukogu on edukalt installeeritud või täiesti juhuslikult juba varasemast olemas, laadime oma töökeskkonda **readxl** raamatukogu, et selles olevad funktsioonid meile R keskkonnas kättesaadavaks muutuksid. 
 
 ```{r}
 library(readxl)
@@ -57,12 +58,14 @@ Projekti nimedeks sobib hästi üks-kaks sõna, mis on eraldatud sidekriipsuga, 
 ### Lihtne import
 
 Kõige esimene näidistabel on mpg andmeset **ggplot2** paketist failis `data/mpg.xlsx`. Siin on kõik isenesest lihtne. Oletame siiski, et me ei tea mis meil selles failis on. Seepärast vaatame kõigepealt, mis tabelid selles .xlsx formaadis failis on:
+
 ```{r}
 sheets <- excel_sheets("data/mpg.xlsx")
 sheets
 ```
 
 Nagu näha on selles *workbookis* üks tabel nimega "Sheet1". Impordime selle kasutades `read_xlsx` funktsiooni:
+
 ```{r}
 sheet1 <- read_xlsx("data/mpg.xlsx", sheet = "Sheet1")
 sheet1
@@ -138,7 +141,7 @@ groups_fixed
 Selle osa jätame nüüd ootele ja vaatame, mis nende teiste tulbanimedega teha annab.
 
 
-Peale sõna "märkida" tuleb esimesel kahel tulbal koodide kirjeldus, eemaldame selle osa.
+Peale sõna "märkida" tuleb esimesel kahel tulbal koodide kirjeldus, eemaldame selle osa. Selleks kasutame **readr** paketi funktsiooni `str_replace()`. Meil on vaja ka eemaldada alles jääv tühik, milleks saab kasutada samast paketist pärit funktsiooni `str_trim()`.
 
 ```{r}
 library(stringr)
@@ -147,7 +150,8 @@ vars <- str_trim(vars)
 vars
 ```
 
-Pasteerime need kaks tulbanimedega vektorit kokku ja asendame kõik tühikud alakriipsudega:
+Pasteerime need kaks tulbanimedega vektorit kokku ja asendame kõik tühikud alakriipsudega. `str_c()` funktsioon konkateneerib stringe ja tuleb samuti **readr** paketist.
+
 ```{r}
 vars_fixed <- str_c(groups_fixed, vars, sep = " ")
 vars_fixed <- str_replace_all(vars_fixed, "\\s+", "_")
@@ -166,7 +170,12 @@ colnames(cardio) <- vars_fixed
 cardio
 ```
 
-Tulemuseks on juba töökorras tabel, millel küll antud juhul vajavad osad tulbanimed siiski edasist parandamist sest on näiteks muuseas ka liiga pikad, et nendega mugav töötada oleks.
+Tulemuseks on juba töökorras tabel, millel küll antud juhul vajavad osad tulbanimed siiski edasist parandamist, sest on näiteks, muuseas ka liiga pikad, et nendega mugav töötada oleks.
 
+See töö on korrektne lõpetada imporditud ja puhastatud tabeli salvestamisega `output` kataloogi. `output` kataloogi võib panna kõik andmetöötluse ja analüüsi artefaktid.
+
+```{r, eval=FALSE}
+write_csv(cardio, "output/cardio.csv")
+```
 
 Igaljuhul on jama palju nende kahe- või mitmekordsete tulbanimedega. Seepärast tasuks andmete importimise peale mõelda juba andmeid sisestama hakates.
