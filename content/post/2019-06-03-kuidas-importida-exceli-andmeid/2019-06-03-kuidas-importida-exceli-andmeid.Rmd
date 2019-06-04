@@ -172,9 +172,10 @@ cardio
 
 Tulemuseks on juba töökorras tabel, millel küll antud juhul vajavad osad tulbanimed siiski edasist parandamist, sest on näiteks, muuseas ka liiga pikad, et nendega mugav töötada oleks.
 
-See töö on korrektne lõpetada imporditud ja puhastatud tabeli salvestamisega `output` kataloogi. `output` kataloogi võib panna kõik andmetöötluse ja analüüsi artefaktid.
+See töö on korrektne lõpetada imporditud ja puhastatud tabeli salvestamisega `output` kataloogi. `output` kataloogi võib panna kõik andmetöötluse ja analüüsi artefaktid. Salvestame tabeli .csv formaadis kasutades **readr** paketi funktsiooni `write_csv()`.
 
 ```{r, eval=FALSE}
+library(readr)
 write_csv(cardio, "output/cardio.csv")
 ```
 
