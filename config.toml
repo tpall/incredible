@@ -103,7 +103,7 @@ googleAnalytics = "UA-100332037-1"
       icon = "fa-table"
       title = "Andmetöötlus"
       description = "Andmete ettevalmistamine analüüsiks -- import erinevatest tabelformaatidest, andmebaasidest ja web API-dest. Andmete puhastamine ja transformeerimine sobivale kujule."
-      #url = "#"
+      url = "/tags/andmetöötlus"
 
     [[params.services.row.list]]
       icon = "fa-bar-chart"
